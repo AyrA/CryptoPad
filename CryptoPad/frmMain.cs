@@ -258,7 +258,42 @@ namespace CryptoPad
             e.HasMorePages = (StringToPrint.Length > 0);
         }
 
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var canCancel =
+                //e.CloseReason != CloseReason.TaskManagerClosing &&
+                e.CloseReason != CloseReason.WindowsShutDown;
+            var msg = "You have unsaved changed. Save before exit?";
+            if (!canCancel)
+            {
+                msg += "\r\nCAUTION! Application exit was requested by the system. You can't cancel it.";
+            }
+            if (HasChange)
+            {
+                switch (Program.AlertMsg(msg, true, canCancel))
+                {
+                    case DialogResult.Yes:
+                        if (!SaveText(false))
+                        {
+                            frmMain_FormClosing(sender, e);
+                        }
+                        break;
+                    case DialogResult.No:
+                        //No action
+                        break;
+                    case DialogResult.Cancel:
+                        e.Cancel = true;
+                        break;
+                }
+            }
+        }
+
         #region Menu
+
+        private void ExitAction_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
 
         private void NewAction_Click(object sender, EventArgs e)
         {
