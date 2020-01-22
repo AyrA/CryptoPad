@@ -33,14 +33,14 @@ namespace CryptoPad
         /// Never serialize or otherwise store this information.
         /// This is automatically set by functions in the <see cref="Encryption"/> class.
         /// </remarks>
-        [NonSerialized]
+        [XmlIgnore, NonSerialized]
         public byte[] AesKey;
         /// <summary>
         /// HMAC key used to authenticate <see cref="Data"/>.
         /// This is automatically set by functions in the <see cref="Encryption"/> class.
         /// </summary>
         /// <remarks>Never serialize or otherwise store this information</remarks>
-        [NonSerialized]
+        [XmlIgnore, NonSerialized]
         public byte[] MacKey;
 
         /// <summary>
