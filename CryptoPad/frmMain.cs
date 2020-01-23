@@ -463,6 +463,11 @@ namespace CryptoPad
             }
         }
 
+        private void HelpAction_Click(object sender, EventArgs e)
+        {
+            Program.InfoMsg("The help is not available yet. You can mostly use this application like a regular text editor.");
+        }
+
         #endregion
     }
 }
