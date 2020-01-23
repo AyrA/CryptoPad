@@ -56,6 +56,12 @@
     <Compile Include="frmCryptoInput.Designer.cs">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmCryptoModeSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCryptoModeSelect.Designer.cs">
+      <DependentUpon>frmCryptoModeSelect.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -68,6 +74,9 @@
     <Compile Include="Tools.cs" />
     <EmbeddedResource Include="frmCryptoInput.resx">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCryptoModeSelect.resx">
+      <DependentUpon>frmCryptoModeSelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>

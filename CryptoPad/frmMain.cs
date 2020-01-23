@@ -50,9 +50,21 @@ namespace CryptoPad
 
         public void UpdateStatus()
         {
-            tsStatusLabel.Text = string.IsNullOrEmpty(FileName) ? "New File" : Path.GetFileName(FileName);
-            tsEncryptionLabel.Text = CurrentFile == null ? "Not Encrypted" : string.Join(", ", CurrentFile.Providers.Select(m => m.Mode));
-            tsSizeLabel.Text = $"{tbEditor.Text.Length} chars";
+            var name = string.IsNullOrEmpty(FileName) ? "New File" : Path.GetFileName(FileName);
+            var encStatus = "Not encrypted";
+            if (HasChange)
+            {
+                name += "*";
+            }
+            if (CurrentFile != null)
+            {
+                encStatus = string.Join(", ", CurrentFile.Providers.Select(m => m.Mode));
+            }
+            Text = $"CryptoPad: [{name}]";
+            tsStatusLabel.Text = name;
+            tsEncryptionLabel.Text = encStatus;
+            tsSizeLabel.Text = $"{tbEditor.Text.Length} UTF-8 characters";
+            tsSizeLabel.ToolTipText = $"{Encoding.UTF8.GetByteCount(tbEditor.Text)} bytes";
         }
 
         private void NewText()
@@ -72,8 +84,41 @@ namespace CryptoPad
             {
                 if (CurrentFile == null)
                 {
-                    //TODO:Show encryption dialog (next line is for testing only right now)
-                    CurrentFile = Encryption.Encrypt(CryptoMode.CryptMachine | CryptoMode.CryptUser, Encoding.UTF8.GetBytes(tbEditor.Text));
+                    using (var dlgCrypt = new frmCryptoModeSelect())
+                    {
+                        if (dlgCrypt.ShowDialog() == DialogResult.OK)
+                        {
+                            if (dlgCrypt.Modes == 0)
+                            {
+                                Program.ErrorMsg("Please select at least one mode of encryption");
+                                return false;
+                            }
+                            var Params = new Dictionary<CryptoMode, object>();
+                            if (dlgCrypt.Modes.HasFlag(CryptoMode.Password))
+                            {
+                                Params[CryptoMode.Password] = dlgCrypt.Password;
+                            }
+                            if (dlgCrypt.Modes.HasFlag(CryptoMode.Keyfile))
+                            {
+                                Params[CryptoMode.Keyfile] = dlgCrypt.Keyfile;
+                            }
+
+                            try
+                            {
+                                CurrentFile = Encryption.Encrypt(dlgCrypt.Modes, Encoding.UTF8.GetBytes(tbEditor.Text), Params);
+                                FileParams = Params;
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.ErrorMsg($"Unable to encrypt your file.\r\n{ex.Message}");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
                 else
                 {
@@ -92,7 +137,8 @@ namespace CryptoPad
                     Program.ErrorMsg($"Unable to save your file.\r\n{ex.Message}");
                     return false;
                 }
-                //Save the current file
+                //Saved the current file
+                BaseContent = tbEditor.Text;
                 UpdateStatus();
                 return true;
             }
@@ -143,11 +189,11 @@ namespace CryptoPad
                                             {
                                                 try
                                                 {
-                                                    Data = Encryption.Decrypt(TempFile);
+                                                    Data = Encryption.Decrypt(TempFile, FileParams);
                                                 }
-                                                catch
+                                                catch(Exception ex)
                                                 {
-                                                    Program.ErrorMsg("Unable to decrypt the file using the supplied data. Invalid key file or password?");
+                                                    Program.ErrorMsg($"Unable to decrypt the file using the supplied data. Invalid key file or password?\r\n{ex.Message}");
                                                 }
                                             }
                                         }
@@ -176,7 +222,7 @@ namespace CryptoPad
             {
                 FileName = dlgOpen.FileName;
                 CurrentFile = TempFile;
-                tbEditor.Text = Encoding.UTF8.GetString(Data);
+                BaseContent = tbEditor.Text = Encoding.UTF8.GetString(Data);
                 UpdateStatus();
             }
         }
@@ -288,6 +334,54 @@ namespace CryptoPad
             }
         }
 
+        private void tsEncryptionLabel_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(FileName))
+            {
+                if (Program.InfoMsg("To set the encryption mode for a new file you have to save it first. Save now?", true) == DialogResult.Yes)
+                {
+                    SaveText(false);
+                }
+            }
+            else
+            {
+                using (var dlgModes = new frmCryptoModeSelect())
+                {
+                    if (dlgModes.ShowDialog() == DialogResult.OK)
+                    {
+                        if (dlgModes.Modes == 0)
+                        {
+                            Program.ErrorMsg("Please select at least one mode of encryption");
+                        }
+                        else
+                        {
+                            var Params = new Dictionary<CryptoMode, object>();
+                            if (dlgModes.Modes.HasFlag(CryptoMode.Password))
+                            {
+                                Params[CryptoMode.Password] = dlgModes.Password;
+                            }
+                            if (dlgModes.Modes.HasFlag(CryptoMode.Keyfile))
+                            {
+                                Params[CryptoMode.Keyfile] = dlgModes.Keyfile;
+                            }
+                            try
+                            {
+                                CurrentFile = Encryption.Encrypt(dlgModes.Modes, Encoding.UTF8.GetBytes(tbEditor.Text), Params);
+                                if (Program.InfoMsg("The cryptographic modes were changed. Save the file now?", true) == DialogResult.Yes)
+                                {
+                                    SaveText(false);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.ErrorMsg($"Unable to encrypt your file.\r\n{ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         #region Menu
 
         private void ExitAction_Click(object sender, EventArgs e)
@@ -308,6 +402,11 @@ namespace CryptoPad
         private void SaveAction_Click(object sender, EventArgs e)
         {
             SaveText(false);
+        }
+
+        private void SaveAsAction_Click(object sender, EventArgs e)
+        {
+            SaveText(true);
         }
 
         private void CopyAction_Click(object sender, EventArgs e)

@@ -94,6 +94,7 @@
             // 
             // topStrip
             // 
+            this.topStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.topStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripButton,
             this.openToolStripButton,
@@ -208,6 +209,7 @@
             this.tsStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 429);
             this.statusStrip.Name = "statusStrip";
+            this.statusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
             this.statusStrip.Size = new System.Drawing.Size(622, 22);
             this.statusStrip.TabIndex = 1;
             this.statusStrip.Text = "statusStrip1";
@@ -220,9 +222,14 @@
             // 
             // tsEncryptionLabel
             // 
+            this.tsEncryptionLabel.IsLink = true;
+            this.tsEncryptionLabel.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             this.tsEncryptionLabel.Name = "tsEncryptionLabel";
-            this.tsEncryptionLabel.Size = new System.Drawing.Size(58, 17);
+            this.tsEncryptionLabel.Size = new System.Drawing.Size(512, 17);
+            this.tsEncryptionLabel.Spring = true;
             this.tsEncryptionLabel.Text = "Encryption";
+            this.tsEncryptionLabel.ToolTipText = "Click to change encryption settings";
+            this.tsEncryptionLabel.Click += new System.EventHandler(this.tsEncryptionLabel_Click);
             // 
             // tsStatusLabel
             // 
@@ -370,6 +377,7 @@
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveAsToolStripMenuItem.Text = "Save &As";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.SaveAsAction_Click);
             // 
             // toolStripSeparator3
             // 
