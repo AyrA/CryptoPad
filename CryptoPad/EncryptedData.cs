@@ -52,33 +52,5 @@ namespace CryptoPad
         {
             return Providers.Any(m => m.Mode == M);
         }
-
-        /// <summary>
-        /// Serializes this instance into an XML string
-        /// </summary>
-        /// <returns>XML string</returns>
-        public string ToXML()
-        {
-            using (var MS = new MemoryStream())
-            {
-                XmlSerializer S = new XmlSerializer(typeof(EncryptedData));
-                S.Serialize(MS, this);
-                return Encoding.UTF8.GetString(MS.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Deserializes an object from an XML string
-        /// </summary>
-        /// <param name="Data">XML string</param>
-        /// <returns>Deserialized object</returns>
-        public static EncryptedData FromXML(string Data)
-        {
-            using (var MS = new MemoryStream(Encoding.UTF8.GetBytes(Data), false))
-            {
-                XmlSerializer S = new XmlSerializer(typeof(EncryptedData));
-                return (EncryptedData)S.Deserialize(MS);
-            }
-        }
     }
 }

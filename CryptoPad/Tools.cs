@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml.Serialization;
 
 namespace CryptoPad
 {
@@ -58,6 +61,34 @@ namespace CryptoPad
             }
             catch { }
             throw new ArgumentException("Value can't be converted to an integer");
+        }
+
+        /// <summary>
+        /// Serializes this instance into an XML string
+        /// </summary>
+        /// <returns>XML string</returns>
+        public static string ToXML<T>(this T ObjectToSerialize)
+        {
+            using (var MS = new MemoryStream())
+            {
+                XmlSerializer S = new XmlSerializer(typeof(T));
+                S.Serialize(MS, ObjectToSerialize);
+                return Encoding.UTF8.GetString(MS.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Deserializes an object from an XML string
+        /// </summary>
+        /// <param name="Data">XML string</param>
+        /// <returns>Deserialized object</returns>
+        public static T FromXML<T>(string Data)
+        {
+            using (var MS = new MemoryStream(Encoding.UTF8.GetBytes(Data), false))
+            {
+                XmlSerializer S = new XmlSerializer(typeof(T));
+                return (T)S.Deserialize(MS);
+            }
         }
     }
 }

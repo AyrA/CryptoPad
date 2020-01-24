@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
@@ -16,6 +17,7 @@ namespace CryptoPad
         private Dictionary<CryptoMode, object> FileParams;
         private EncryptedData CurrentFile;
         private string StringToPrint;
+        private AppSettings Settings;
 
         private bool HasChange
         {
@@ -32,6 +34,32 @@ namespace CryptoPad
         public frmMain()
         {
             InitializeComponent();
+
+            Settings = AppSettings.GetSettings();
+
+            WindowState = Settings.WindowStartupState;
+            if (WindowState == FormWindowState.Normal)
+            {
+                Size = Settings.WindowSize;
+            }
+
+            tbEditor.Font = Settings.GetFont();
+            try
+            {
+                tbEditor.ForeColor = Settings.EditorForegroundColor.GetColor();
+            }
+            catch
+            {
+                Settings.EditorForegroundColor = new ColorCode(tbEditor.ForeColor);
+            }
+            try
+            {
+                tbEditor.BackColor = Settings.EditorBackgroundColor.GetColor();
+            }
+            catch
+            {
+                Settings.EditorBackgroundColor = new ColorCode(tbEditor.BackColor);
+            }
 
             FileParams = new Dictionary<CryptoMode, object>();
 
@@ -155,7 +183,7 @@ namespace CryptoPad
                 {
                     try
                     {
-                        TempFile = EncryptedData.FromXML(File.ReadAllText(dlgOpen.FileName));
+                        TempFile = Tools.FromXML<EncryptedData>(File.ReadAllText(dlgOpen.FileName));
                         try
                         {
                             Data = Encryption.Decrypt(TempFile);
@@ -191,7 +219,7 @@ namespace CryptoPad
                                                 {
                                                     Data = Encryption.Decrypt(TempFile, FileParams);
                                                 }
-                                                catch(Exception ex)
+                                                catch (Exception ex)
                                                 {
                                                     Program.ErrorMsg($"Unable to decrypt the file using the supplied data. Invalid key file or password?\r\n{ex.Message}");
                                                 }
@@ -469,5 +497,27 @@ namespace CryptoPad
         }
 
         #endregion
+
+        private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Settings.WindowStartupState = WindowState;
+            if (WindowState == FormWindowState.Normal)
+            {
+                Settings.WindowSize = Size;
+            }
+
+            Settings.SetFont(tbEditor.Font);
+            Settings.EditorForegroundColor = new ColorCode(tbEditor.ForeColor);
+            Settings.EditorBackgroundColor = new ColorCode(tbEditor.BackColor);
+
+            try
+            {
+                Settings.SaveSettings();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Unable to save settings on exit: {ex.Message}");
+            }
+        }
     }
 }

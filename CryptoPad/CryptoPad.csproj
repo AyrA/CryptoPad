@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AesCryptoData.cs" />
+    <Compile Include="AppSettings.cs" />
     <Compile Include="EncryptedData.cs" />
     <Compile Include="Encryption.cs" />
     <Compile Include="frmCryptoInput.cs">
