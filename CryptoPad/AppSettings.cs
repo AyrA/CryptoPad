@@ -12,6 +12,9 @@ namespace CryptoPad
     [Serializable]
     public class AppSettings
     {
+        [XmlIgnore]
+        public string KeyStorage { get; private set; }
+
         public Size WindowSize { get; set; }
 
         public FormWindowState WindowStartupState { get; set; }
@@ -81,7 +84,9 @@ namespace CryptoPad
             try
             {
                 //Portable settings win over all others
-                return Tools.FromXML<AppSettings>(File.ReadAllText(PortableSettingsFile));
+                var Settings = Tools.FromXML<AppSettings>(File.ReadAllText(PortableSettingsFile));
+                Settings.KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
+                return Settings;
             }
             catch (Exception ex)
             {
@@ -92,6 +97,7 @@ namespace CryptoPad
             try
             {
                 ASGlobal = Tools.FromXML<AppSettings>(File.ReadAllText(GlobalSettingsFile));
+                ASGlobal.KeyStorage = Path.Combine(Path.GetDirectoryName(GlobalSettingsFile), "Keys");
             }
             catch (Exception ex)
             {
@@ -100,6 +106,7 @@ namespace CryptoPad
             try
             {
                 ASLocal = Tools.FromXML<AppSettings>(File.ReadAllText(UserSettingsFile));
+                ASLocal.KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
             }
             catch (Exception ex)
             {
@@ -108,7 +115,14 @@ namespace CryptoPad
             //Return local settings if present
             if (ASGlobal == null)
             {
-                return ASLocal == null ? new AppSettings() : ASLocal;
+                if (ASLocal == null)
+                {
+                    return new AppSettings()
+                    {
+                        KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys")
+                    };
+                }
+                return ASLocal;
             }
             return ASGlobal;
         }
@@ -119,6 +133,7 @@ namespace CryptoPad
             if (File.Exists(PortableSettingsFile))
             {
                 File.WriteAllText(PortableSettingsFile, Data);
+                KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
             }
             var DirName = Path.GetDirectoryName(UserSettingsFile);
             try
@@ -130,6 +145,7 @@ namespace CryptoPad
                 //Don't care
             }
             File.WriteAllText(UserSettingsFile, Data);
+            KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
         }
     }
 

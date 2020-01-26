@@ -72,6 +72,7 @@
     <Compile Include="KeyProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RSAEncryption.cs" />
     <Compile Include="Tools.cs" />
     <EmbeddedResource Include="frmCryptoInput.resx">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>

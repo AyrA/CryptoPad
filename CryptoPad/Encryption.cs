@@ -201,6 +201,24 @@ namespace CryptoPad
         }
 
         /// <summary>
+        /// Encrypts data using the given RSA public key
+        /// </summary>
+        /// <param name="Data">Data to encrypt</param>
+        /// <param name="Password">Key to encrypt the data with</param>
+        /// <returns>Encrypted data</returns>
+        private static AesCryptoData EncryptWithRSAKey(byte[] Data, RSAParameters Params)
+        {
+            if (RSAEncryption.HasPublicKey(Params))
+            {
+                return new AesCryptoData()
+                {
+                    Data = RSAEncryption.Encrypt(Params, Data)
+                };
+            }
+            throw new CryptographicException("The supplied RSA key lacks the public key parts");
+        }
+
+        /// <summary>
         /// Decrypts data using a given key file
         /// </summary>
         /// <param name="Data">Data to decrypt</param>
@@ -225,6 +243,21 @@ namespace CryptoPad
                 var AesKey = pbkdf.GetBytes(AES_KEYSIZE / 8);
                 return DecryptWithKey(Data, AesKey, MacKey);
             }
+        }
+
+        /// <summary>
+        /// Decrypts data using the given RSA key
+        /// </summary>
+        /// <param name="Data">Data to decrypt</param>
+        /// <param name="Params">RSA key</param>
+        /// <returns>Decrypted data</returns>
+        private static byte[] DecryptWithRSAKey(AesCryptoData Data, RSAParameters Params)
+        {
+            if (RSAEncryption.HasPrivateKey(Params))
+            {
+                return RSAEncryption.Decrypt(Params, Data.Data);
+            }
+            throw new CryptographicException("The supplied RSA key lacks the private key parts");
         }
 
         #endregion
@@ -264,6 +297,13 @@ namespace CryptoPad
                     case CryptoMode.CryptMachine:
                         Data.Salt = Data.IV = null;
                         Data.Data = ProtectData(true, KeyBlob);
+                        break;
+                    case CryptoMode.RSA:
+                        if (Param == null || Param.GetType() != typeof(RSAParameters))
+                        {
+                            throw new ArgumentException("RSA mode requires an RSAParameters structure as argument");
+                        }
+                        Data = EncryptWithRSAKey(KeyBlob, (RSAParameters)Param);
                         break;
                     case CryptoMode.Keyfile:
                         if (Param == null || Param.GetType() != typeof(string))
@@ -348,6 +388,15 @@ namespace CryptoPad
                         }
                         catch { continue; }
                         break;
+                    case CryptoMode.RSA:
+                        try
+                        {
+                            skipped |= Param == null || Param.GetType() != typeof(RSAParameters);
+                            KeyBlob = DecryptWithRSAKey(P.KeyData, (RSAParameters)Param);
+                        }
+                        catch
+                        { continue; }
+                        break;
                     case CryptoMode.Keyfile:
                         try
                         {
@@ -428,6 +477,11 @@ namespace CryptoPad
         /// Encryption based on a keyfile
         /// </summary>
         /// <remarks>This mode requires a string as argument that serves as the key file name</remarks>
-        Keyfile = Password << 1
+        Keyfile = Password << 1,
+        /// <summary>
+        /// Encryption using an RSA key
+        /// </summary>
+        /// <remarks>This mode requires an <see cref="RSAParameters"/> structure as argument</remarks>
+        RSA = Keyfile << 1
     }
 }
