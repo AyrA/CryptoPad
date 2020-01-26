@@ -65,16 +65,20 @@ namespace CryptoPad
             SetFont(SystemFonts.DefaultFont);
         }
 
-        public RSAParameters[] LoadRSAKeys()
+        public RSAKey[] LoadRSAKeys()
         {
-            var Params = new List<RSAParameters>();
+            var Params = new List<RSAKey>();
             if (Directory.Exists(KeyStorage))
             {
                 foreach (var F in Directory.GetFiles(KeyStorage, "*.xml"))
                 {
                     try
                     {
-                        Params.Add(Tools.FromXML<RSAParameters>(File.ReadAllText(F)));
+                        var K = Tools.FromXML<RSAKey>(File.ReadAllText(F));
+                        if (K.IsValid())
+                        {
+                            Params.Add(K);
+                        }
                     }
                     catch
                     {
@@ -93,7 +97,7 @@ namespace CryptoPad
             return Params.ToArray();
         }
 
-        public void SaveRSAKeys(IEnumerable<RSAParameters> Keys, bool Purge = false)
+        public void SaveRSAKeys(IEnumerable<RSAKey> Keys, bool Purge = false)
         {
             if (!Directory.Exists(KeyStorage))
             {
@@ -117,10 +121,10 @@ namespace CryptoPad
             }
             else
             {
-                var ExistingKeys = new List<RSAParameters>(LoadRSAKeys());
-                foreach (var Key in Keys)
+                var ExistingKeys = new List<RSAKey>(LoadRSAKeys());
+                foreach (var Key in Keys.Where(m => m.IsValid()))
                 {
-                    if (!ExistingKeys.Any(m => RSAEncryption.Compare(m, Key)))
+                    if (!ExistingKeys.Any(m => m.Equals(Key)))
                     {
                         ExistingKeys.Add(Key);
                     }

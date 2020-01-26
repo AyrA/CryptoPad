@@ -190,52 +190,74 @@ namespace CryptoPad
                         }
                         catch
                         {
-                            if (TempFile.HasProvider(CryptoMode.Keyfile) || TempFile.HasProvider(CryptoMode.Password))
+                            if (TempFile.HasProvider(CryptoMode.RSA))
                             {
-                                using (var pwd = new frmCryptoInput((CryptoMode)TempFile.Providers.Sum(m => (int)m.Mode)))
+                                //Try all RSA keys until one succeeds
+                                foreach (var K in Settings.LoadRSAKeys().Where(m => RSAEncryption.HasPrivateKey(m.Key)))
                                 {
-                                    if (pwd.ShowDialog() == DialogResult.OK)
+                                    FileParams[CryptoMode.RSA] = K;
+                                    try
                                     {
-                                        if (pwd.ValidInput)
+                                        Data = Encryption.Decrypt(TempFile, FileParams);
+                                    }
+                                    catch
+                                    {
+                                        //Try next key
+                                    }
+                                }
+                                if (Data == null)
+                                {
+                                    FileParams.Remove(CryptoMode.RSA);
+                                }
+                            }
+                            if (Data == null)
+                            {
+                                if (TempFile.HasProvider(CryptoMode.Keyfile) || TempFile.HasProvider(CryptoMode.Password))
+                                {
+                                    using (var pwd = new frmCryptoInput((CryptoMode)TempFile.Providers.Sum(m => (int)m.Mode)))
+                                    {
+                                        if (pwd.ShowDialog() == DialogResult.OK)
                                         {
-                                            if (!string.IsNullOrEmpty(pwd.Password))
+                                            if (pwd.ValidInput)
                                             {
-                                                FileParams[CryptoMode.Password] = pwd.Password;
+                                                if (!string.IsNullOrEmpty(pwd.Password))
+                                                {
+                                                    FileParams[CryptoMode.Password] = pwd.Password;
+                                                }
+                                                if (!string.IsNullOrEmpty(pwd.Keyfile))
+                                                {
+                                                    if (File.Exists(pwd.Keyfile))
+                                                    {
+                                                        FileParams[CryptoMode.Password] = pwd.Keyfile;
+                                                    }
+                                                    else
+                                                    {
+                                                        Program.ErrorMsg("Invalid key file selected");
+                                                    }
+                                                }
+                                                if (FileParams.Count > 0)
+                                                {
+                                                    try
+                                                    {
+                                                        Data = Encryption.Decrypt(TempFile, FileParams);
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        Program.ErrorMsg($"Unable to decrypt the file using the supplied data. Invalid key file or password?\r\n{ex.Message}");
+                                                    }
+                                                }
                                             }
-                                            if (!string.IsNullOrEmpty(pwd.Keyfile))
+                                            else
                                             {
-                                                if (File.Exists(pwd.Keyfile))
-                                                {
-                                                    FileParams[CryptoMode.Password] = pwd.Keyfile;
-                                                }
-                                                else
-                                                {
-                                                    Program.ErrorMsg("Invalid key file selected");
-                                                }
+                                                Program.ErrorMsg("You need to provide at least one of the offered options to decrypt the file.");
                                             }
-                                            if (FileParams.Count > 0)
-                                            {
-                                                try
-                                                {
-                                                    Data = Encryption.Decrypt(TempFile, FileParams);
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    Program.ErrorMsg($"Unable to decrypt the file using the supplied data. Invalid key file or password?\r\n{ex.Message}");
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            Program.ErrorMsg("You need to provide at least one of the offered options to decrypt the file.");
                                         }
                                     }
                                 }
-
-                            }
-                            else
-                            {
-                                Program.ErrorMsg("Failed to decrypt the data.");
+                                else
+                                {
+                                    Program.ErrorMsg("Failed to decrypt the data.");
+                                }
                             }
                         }
                     }

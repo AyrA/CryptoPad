@@ -199,22 +199,27 @@ namespace CryptoPad
             return true;
         }
 
-        public static RSAParameters GenerateKey(int Size = DEFAULT_KEYSIZE)
+        public static RSAKey GenerateKey(string Name, int Size = DEFAULT_KEYSIZE)
         {
             using (var Alg = RSA.Create())
             {
                 Alg.KeySize = Size;
-                return Alg.ExportParameters(true);
+                return new RSAKey(Name, Alg.ExportParameters(true));
             }
         }
 
-        public static RSAParameters StripPrivate(RSAParameters Key)
+        public static RSAKey StripPrivate(RSAKey Key)
         {
-            return new RSAParameters()
+            return new RSAKey(Key.Name, new RSAParameters()
             {
-                Modulus = (byte[])Key.Modulus.Clone(),
-                Exponent = (byte[])Key.Exponent.Clone()
-            };
+                Modulus = (byte[])Key.Key.Modulus.Clone(),
+                Exponent = (byte[])Key.Key.Exponent.Clone()
+            });
+        }
+
+        public static byte[] Encrypt(RSAKey Key, byte[] Data)
+        {
+            return Encrypt(Key.Key, Data);
         }
 
         public static byte[] Encrypt(RSAParameters Key, byte[] Data)
@@ -226,6 +231,11 @@ namespace CryptoPad
             }
         }
 
+        public static byte[] Decrypt(RSAKey Key, byte[] Data)
+        {
+            return Decrypt(Key.Key, Data);
+        }
+
         public static byte[] Decrypt(RSAParameters Key, byte[] Data)
         {
             using (var Alg = RSA.Create())
@@ -235,6 +245,11 @@ namespace CryptoPad
             }
         }
 
+        public static byte[] Sign(RSAKey Key, byte[] Data)
+        {
+            return Sign(Key.Key, Data);
+        }
+
         public static byte[] Sign(RSAParameters Key, byte[] Data)
         {
             using (var Alg = RSA.Create())
@@ -242,6 +257,11 @@ namespace CryptoPad
                 Alg.ImportParameters(Key);
                 return Alg.SignData(Data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             }
+        }
+
+        public static bool Verify(RSAKey Key, byte[] Data, byte[] Signature)
+        {
+            return Verify(Key.Key, Data, Signature);
         }
 
         public static bool Verify(RSAParameters Key, byte[] Data, byte[] Signature)
