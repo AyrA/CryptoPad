@@ -262,6 +262,34 @@ namespace CryptoPad
 
         #endregion
 
+        #region Hashing
+
+        /// <summary>
+        /// Computes the SHA256 of a given string
+        /// </summary>
+        /// <param name="Data">String</param>
+        /// <returns>Hash</returns>
+        /// <remarks>Will UTF-8 encode the string</remarks>
+        public static string HashSHA256(string Data)
+        {
+            return HashSHA256(Encoding.UTF8.GetBytes(Data));
+        }
+
+        /// <summary>
+        /// Computes the SHA256 of the given bytes
+        /// </summary>
+        /// <param name="Data">byte data</param>
+        /// <returns>Hash</returns>
+        public static string HashSHA256(byte[] Data)
+        {
+            using (var Hasher = SHA256.Create())
+            {
+                var Result = Hasher.ComputeHash(Data);
+                return string.Concat(Result.Select(m => m.ToString("X2")));
+            }
+        }
+        #endregion
+
         #region Public Functions
 
         /// <summary>

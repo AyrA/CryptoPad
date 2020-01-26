@@ -143,6 +143,62 @@ namespace CryptoPad
             return NotEmpty(Param.Exponent, Param.Modulus);
         }
 
+        public static bool Compare(RSAParameters Key1, RSAParameters Key2)
+        {
+            //Check if public keys are available
+            if (HasPublicKey(Key1) || HasPublicKey(Key2))
+            {
+                //Check if both keys have a public key
+                if (HasPublicKey(Key1) && HasPublicKey(Key2))
+                {
+                    if (
+                        Key1.Exponent.Length != Key2.Exponent.Length ||
+                        Key1.Modulus.Length != Key2.Modulus.Length ||
+                        !Key1.Exponent.SequenceEqual(Key2.Exponent) ||
+                        !Key1.Modulus.SequenceEqual(Key2.Modulus))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    //Public key missing from one of them
+                    return false;
+                }
+            }
+            //Check if private keys are available
+            if (HasPrivateKey(Key1) || HasPrivateKey(Key2))
+            {
+                //Check if both keys have a private key
+                if (HasPrivateKey(Key1) && HasPrivateKey(Key2))
+                {
+                    if (
+                        Key1.D.Length != Key2.D.Length ||
+                        Key1.DP.Length != Key2.DP.Length ||
+                        Key1.DQ.Length != Key2.DQ.Length ||
+                        Key1.InverseQ.Length != Key2.InverseQ.Length ||
+                        Key1.P.Length != Key2.P.Length ||
+                        Key1.Q.Length != Key2.Q.Length ||
+                        !Key1.D.SequenceEqual(Key2.D) ||
+                        !Key1.DP.SequenceEqual(Key2.DP) ||
+                        !Key1.DQ.SequenceEqual(Key2.DQ) ||
+                        !Key1.InverseQ.SequenceEqual(Key2.InverseQ) ||
+                        !Key1.P.SequenceEqual(Key2.P) ||
+                        !Key1.Q.SequenceEqual(Key2.Q))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    //Private key missing from one of them
+                    return false;
+                }
+            }
+            //Keys are identical
+            return true;
+        }
+
         public static RSAParameters GenerateKey(int Size = DEFAULT_KEYSIZE)
         {
             using (var Alg = RSA.Create())

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -61,6 +63,74 @@ namespace CryptoPad
             EditorBackgroundColor = new ColorCode(Color.FromKnownColor(KnownColor.Window).Name);
 
             SetFont(SystemFonts.DefaultFont);
+        }
+
+        public RSAParameters[] LoadRSAKeys()
+        {
+            var Params = new List<RSAParameters>();
+            if (Directory.Exists(KeyStorage))
+            {
+                foreach (var F in Directory.GetFiles(KeyStorage, "*.xml"))
+                {
+                    try
+                    {
+                        Params.Add(Tools.FromXML<RSAParameters>(File.ReadAllText(F)));
+                    }
+                    catch
+                    {
+                        //Invalid key maybe?
+                        try
+                        {
+                            File.Move(F, Path.ChangeExtension(F, ".invalid"));
+                        }
+                        catch
+                        {
+                            //Can't rename it either. Just skip
+                        }
+                    }
+                }
+            }
+            return Params.ToArray();
+        }
+
+        public void SaveRSAKeys(IEnumerable<RSAParameters> Keys, bool Purge = false)
+        {
+            if (!Directory.Exists(KeyStorage))
+            {
+                Directory.CreateDirectory(KeyStorage);
+            }
+            if (Purge)
+            {
+                foreach (var F in Directory.GetFiles(KeyStorage, "*.xml"))
+                {
+                    try
+                    {
+                        File.Delete(F);
+                    }
+                    catch
+                    {
+                        //Don't care
+                        //We can't abort because it would leave a partially deleted directory
+                    }
+                }
+                SaveRSAKeys(Keys, false);
+            }
+            else
+            {
+                var ExistingKeys = new List<RSAParameters>(LoadRSAKeys());
+                foreach (var Key in Keys)
+                {
+                    if (!ExistingKeys.Any(m => RSAEncryption.Compare(m, Key)))
+                    {
+                        ExistingKeys.Add(Key);
+                    }
+                }
+                foreach (var K in ExistingKeys)
+                {
+                    var Data = K.ToXML().Trim();
+                    File.WriteAllText(Path.Combine(KeyStorage, Encryption.HashSHA256(Data) + ".xml"), Data);
+                }
+            }
         }
 
         public Font GetFont()
