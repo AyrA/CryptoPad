@@ -4,11 +4,13 @@ A simple, encrypted text editor
 
 ## Features
 
-- AES encryption
+- Insustry standard AES encryption
 - Multiple different encryption modes
+- Backdoor free
+- Code that is easy to verify and audit
 - Simple text edit controls comparable to other simple plain text editors.
 - Printing
-- Backdoor free
+- Portable
 
 ## Usage
 
@@ -20,11 +22,9 @@ Where possible, it will automatically encrypt and decrypt your files.
 Your text is encrypted using highest grade AES 256 bit encryption.
 There are no custom encryption methods or obfuscation techniques in use.
 
-The encrypted data is secured against tampering.
-
-All random numbers are produced using random number generators deemed safe for cryptographic use.
-
-See **Key recovery** chapter towards the bottom for more information.
+- The mode in use is CBC with PKCS7 padding.
+- The encrypted data is secured against tampering by using a SHA256 HMAC.
+- Random data is produced using a cryptographically safe number generator.
 
 ## How it works
 
@@ -89,14 +89,18 @@ you can edit and re-encrypt it without requiring access to the other modes.
 This means that the file format allows multiple people to have their own password each for example.
 
 Below is the list of all supported modes.
-*Security* indicates how safe this method is in terms of protecting the keys, provided you use it correctly.
-*Stability* indicates how volatile this method is.
+
+- *Security* indicates how safe this method is in terms of protecting the keys, provided you use it correctly.
+- *Stability* indicates how volatile this method is.
+- *Automatic E/D* indicates whether this mode can encrypt and/or decrypt without user interaction.
+
 At least one high stability method should be chosen to increse chances of recovery because of data loss.
 
 ### Mode: Local User Account
 
 - Security: High
 - Stability: Low
+- Automatic E/D: Yes/Yes
 
 This uses the `CryptProtectData` function of Windows.
 This allows fully automatic encryption and decryption of the file.
@@ -109,6 +113,7 @@ Roaming profiles in an Active Directory domain will work properly.
 
 This method is suitable for quick access to encrypted files.
 This means you can use it to avoid typing the password or selecting the key file each time you open the file.
+It also works well in combination with the RSA key method if you plan to send a file to somebody.
 
 #### Recommendation:
 
@@ -125,6 +130,7 @@ unless the file is useless anyways without access to that specific account.
 
 - Security: High
 - Stability: Medium
+- Automatic E/D: Yes/Yes
 
 This is very similar to the local user account encryption,
 but uses keys bound to the Windows installation of the computer and not to the user.
@@ -151,6 +157,7 @@ unless the file is useless anyways without access to that specific computer.
 
 - Security: High
 - Stability: Medium
+- Automatic E/D: No/No
 
 Uses a key file to encrypt and decrypt the text.
 Any file of your liking can be chosen,
@@ -196,13 +203,14 @@ Store it on removable media and keep that in a safe location.
 
 - Security: Medium
 - Stability: High
+- Automatic E/D: No/No
 
 Regular password based encryption as is very common.
 The security depends on the chosen password.
 
 The paramters for processing the password have been chosen much higher than usual.
 You might notice this as a slight delay when you save/load a file for the first time.
-This is not an excuse to chose a weak password but merely making this future proof.
+This is not an excuse to choose a weak password but merely making this future proof.
 
 #### Usage:
 
@@ -219,25 +227,65 @@ Chose a password that ideally is at least 10 characters long and is not a well k
 Short passwords, or passwords previously discovered in data breaches significantly weaken the encryption.
 Forgotten passwords can't be restored.
 
+### Mode: RSA
+
+- Security: High
+- Stability: High
+- Automatic E/D: No/Yes
+
+This is similar to the "Keyfile" method but uses RSA encryption.
+You can only use RSA keys and not arbitrarily chosen files.
+A key generator is provided whenever you save a file.
+Decryption of an RSA protected file is automatically attempted with all keys in the key storage.
+
+#### Usage:
+
+This mode is recommended if you want to send an encrypted file to someone else.
+The recipient can generate an RSA key and give you the public key part of it.
+You can use this key to encrypt the file. Only the recipient can decrypt it now.
+
+#### Recommendation:
+
+Use to securely send a text file to somebody,
+or use for yourself as an alternative to the keyfile method.
+
+#### Possible problems:
+
+An RSA key has a "private" and a "public" part.
+The public part is used to encrypt, the private part to decrypt.
+This means if you possess a key that only has the public part,
+you can encrypt files that you can't decrypt again.
+
+The application will warn you if you try to pick such a key
+but will allow you to use it this way (see "Usage" above).
+
 ## Key recovery
 
 There are no backdoors and/or master keys hardcoded into the application **and there never will be any**.
 If every single configured mode of a file is unable to decrypt it, you can consider the content lost.
+We plan on providing many modes of various design to increase your chance in key recovery.
 
 Please do not contact me about files you're not able to decrypt.
-**I am not able to bring back encrypted content you lost the keys for!**
 
-If you use the keyfile method, back up the file to a safe location.
+**I AM NOT ABLE TO BRING BACK ENCRYPTED CONTENT YOU LOST THE KEYS FOR!**
+
+This application will eventually get a mode/configuration that allows some form of recovery,
+mainly to make it suitable for a corporate environment.
+
+If you use the keyfile or RSA method, back up the key files to a safe location.
 If you use the password method, ensure there's a way to get your password back if you forget it.
 
 ## TODO
 
 These items are not yet implemented, but not confirmed to be implemented ever either.
+Those that have been implemented will be moved to the bottom.
 
 - [ ] Help
 - [ ] User defined encrypted and unencrypted metadata
 - [ ] Compression
-- [ ] Password confirmation
+- [ ] Password prompt confirmation
 - [ ] Custom modes via plugin system
-- [ ] More encryption modes (Especially RSA and certificate based encryption)
+- [ ] Certificate based encryption (essentially RSA via the Windows certificate store)
 - [ ] Duplicate modes (for example multiple passwords)
+- [ ] Text formatting (probably RTF)
+- [X] RSA encryption
