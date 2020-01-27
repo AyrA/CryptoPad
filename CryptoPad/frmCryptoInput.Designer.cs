@@ -37,6 +37,9 @@
             this.OFD = new System.Windows.Forms.OpenFileDialog();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.cbRSA = new System.Windows.Forms.CheckBox();
+            this.btnRSA = new System.Windows.Forms.Button();
+            this.lblRSAName = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblDesc
@@ -102,10 +105,10 @@
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(324, 137);
+            this.btnOK.Location = new System.Drawing.Point(324, 168);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 6;
+            this.btnOK.TabIndex = 9;
             this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -114,12 +117,42 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(405, 137);
+            this.btnCancel.Location = new System.Drawing.Point(405, 168);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 7;
+            this.btnCancel.TabIndex = 10;
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            // 
+            // cbRSA
+            // 
+            this.cbRSA.AutoSize = true;
+            this.cbRSA.Location = new System.Drawing.Point(26, 129);
+            this.cbRSA.Name = "cbRSA";
+            this.cbRSA.Size = new System.Drawing.Size(69, 17);
+            this.cbRSA.TabIndex = 6;
+            this.cbRSA.Text = "RSA Key";
+            this.cbRSA.UseVisualStyleBackColor = true;
+            // 
+            // btnRSA
+            // 
+            this.btnRSA.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRSA.Location = new System.Drawing.Point(405, 125);
+            this.btnRSA.Name = "btnRSA";
+            this.btnRSA.Size = new System.Drawing.Size(75, 23);
+            this.btnRSA.TabIndex = 8;
+            this.btnRSA.Text = "&Select...";
+            this.btnRSA.UseVisualStyleBackColor = true;
+            this.btnRSA.Click += new System.EventHandler(this.btnRSA_Click);
+            // 
+            // lblRSAName
+            // 
+            this.lblRSAName.AutoSize = true;
+            this.lblRSAName.Location = new System.Drawing.Point(123, 130);
+            this.lblRSAName.Name = "lblRSAName";
+            this.lblRSAName.Size = new System.Drawing.Size(99, 13);
+            this.lblRSAName.TabIndex = 7;
+            this.lblRSAName.Text = "<No Key Selected>";
             // 
             // frmCryptoInput
             // 
@@ -127,7 +160,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(492, 172);
+            this.ClientSize = new System.Drawing.Size(492, 203);
+            this.Controls.Add(this.lblRSAName);
+            this.Controls.Add(this.btnRSA);
+            this.Controls.Add(this.cbRSA);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.tbPassword);
@@ -159,5 +195,8 @@
         private System.Windows.Forms.OpenFileDialog OFD;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.CheckBox cbRSA;
+        private System.Windows.Forms.Button btnRSA;
+        private System.Windows.Forms.Label lblRSAName;
     }
 }

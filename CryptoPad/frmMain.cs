@@ -214,7 +214,7 @@ namespace CryptoPad
                             {
                                 if (TempFile.HasProvider(CryptoMode.Keyfile) || TempFile.HasProvider(CryptoMode.Password))
                                 {
-                                    using (var pwd = new frmCryptoInput((CryptoMode)TempFile.Providers.Sum(m => (int)m.Mode)))
+                                    using (var pwd = new frmCryptoInput((CryptoMode)TempFile.Providers.Sum(m => (int)m.Mode), null))
                                     {
                                         if (pwd.ShowDialog() == DialogResult.OK)
                                         {
