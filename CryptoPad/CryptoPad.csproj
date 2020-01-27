@@ -51,28 +51,28 @@
     <Compile Include="AppSettings.cs" />
     <Compile Include="EncryptedData.cs" />
     <Compile Include="Encryption.cs" />
-    <Compile Include="frmCryptoInput.cs">
+    <Compile Include="UI\frmCryptoInput.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmCryptoInput.Designer.cs">
+    <Compile Include="UI\frmCryptoInput.Designer.cs">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmCryptoModeSelect.cs">
+    <Compile Include="UI\frmCryptoModeSelect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmCryptoModeSelect.Designer.cs">
+    <Compile Include="UI\frmCryptoModeSelect.Designer.cs">
       <DependentUpon>frmCryptoModeSelect.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmMain.cs">
+    <Compile Include="UI\frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmMain.Designer.cs">
+    <Compile Include="UI\frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmRSASelect.cs">
+    <Compile Include="UI\frmRSASelect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmRSASelect.Designer.cs">
+    <Compile Include="UI\frmRSASelect.Designer.cs">
       <DependentUpon>frmRSASelect.cs</DependentUpon>
     </Compile>
     <Compile Include="KeyProvider.cs" />
@@ -81,16 +81,16 @@
     <Compile Include="RSAEncryption.cs" />
     <Compile Include="RSAKey.cs" />
     <Compile Include="Tools.cs" />
-    <EmbeddedResource Include="frmCryptoInput.resx">
+    <EmbeddedResource Include="UI\frmCryptoInput.resx">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmCryptoModeSelect.resx">
+    <EmbeddedResource Include="UI\frmCryptoModeSelect.resx">
       <DependentUpon>frmCryptoModeSelect.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmMain.resx">
+    <EmbeddedResource Include="UI\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmRSASelect.resx">
+    <EmbeddedResource Include="UI\frmRSASelect.resx">
       <DependentUpon>frmRSASelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

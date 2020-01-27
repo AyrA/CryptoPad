@@ -112,7 +112,7 @@ namespace CryptoPad
             {
                 if (CurrentFile == null)
                 {
-                    using (var dlgCrypt = new frmCryptoModeSelect())
+                    using (var dlgCrypt = new frmCryptoModeSelect(Settings))
                     {
                         if (dlgCrypt.ShowDialog() == DialogResult.OK)
                         {
@@ -395,7 +395,7 @@ namespace CryptoPad
             }
             else
             {
-                using (var dlgModes = new frmCryptoModeSelect())
+                using (var dlgModes = new frmCryptoModeSelect(Settings))
                 {
                     if (dlgModes.ShowDialog() == DialogResult.OK)
                     {
