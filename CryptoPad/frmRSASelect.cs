@@ -8,21 +8,31 @@ namespace CryptoPad
     public partial class frmRSASelect : Form
     {
         public RSAKey SelectedKey { get; private set; }
+        public RSAKey[] AllKeys { get; private set; }
 
         public frmRSASelect(IEnumerable<RSAKey> Keys, bool CanCreate, RSAKey PreSelected = null)
         {
             if (Keys == null)
             {
-                Keys = new RSAKey[0];
+                AllKeys = new RSAKey[0];
             }
-            var KeyList = Keys.ToArray();
-            var ObjList = KeyList
+            AllKeys = Keys.ToArray();
+
+            InitializeComponent();
+
+            btnCreate.Enabled = CanCreate;
+            InitList(PreSelected);
+
+        }
+
+        private void InitList(RSAKey PreSelected)
+        {
+            var ObjList = AllKeys
                 .Select(m => new KeyLabel() { Key = m })
                 .OrderBy(m => m.Key.Name)
                 .Cast<object>()
                 .ToArray();
-            InitializeComponent();
-            btnCreate.Enabled = CanCreate;
+            cbKey.Items.Clear();
             cbKey.Items.AddRange(ObjList);
             if (ObjList.Length > 0)
             {
@@ -30,9 +40,9 @@ namespace CryptoPad
             }
             if (PreSelected != null)
             {
-                for (var i = 0; i < KeyList.Length; i++)
+                for (var i = 0; i < AllKeys.Length; i++)
                 {
-                    if (KeyList[i] == PreSelected)
+                    if (AllKeys[i] == PreSelected)
                     {
                         cbKey.SelectedIndex = i;
                         break;
@@ -49,6 +59,11 @@ namespace CryptoPad
             {
                 return Key.Name;
             }
+        }
+
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            //TODO: Create form
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CryptoPad
@@ -7,30 +9,41 @@ namespace CryptoPad
     {
         public string Keyfile { get; private set; }
         public string Password { get; private set; }
-
+        public RSAKey RsaKey { get; private set; }
         public CryptoMode Modes { get; private set; }
 
         public bool ValidInput
         {
             get
             {
-                return !string.IsNullOrEmpty(Keyfile) || !string.IsNullOrEmpty(Password);
+                return
+                    !string.IsNullOrEmpty(Keyfile) ||
+                    !string.IsNullOrEmpty(Password) ||
+                    RsaKey != null;
             }
         }
 
-        public frmCryptoModeSelect(CryptoMode AllowedModes = (CryptoMode)~0, CryptoMode PreselectedModes = 0)
+        private AppSettings Settings;
+
+        public frmCryptoModeSelect(AppSettings Settings, CryptoMode AllowedModes = (CryptoMode)~0, CryptoMode PreselectedModes = 0)
         {
             InitializeComponent();
+
+            this.Settings = Settings;
+
             //Set enabled controls
             cbUserAccount.Enabled = AllowedModes.HasFlag(CryptoMode.CryptUser);
             cbComputerAccount.Enabled = AllowedModes.HasFlag(CryptoMode.CryptMachine);
             btnBrowse.Enabled = tbKeyfile.Enabled = cbKeyfile.Enabled = AllowedModes.HasFlag(CryptoMode.Keyfile);
             tbPassword.Enabled = cbPassword.Enabled = AllowedModes.HasFlag(CryptoMode.Password);
+            lblRsaName.Enabled = cbRSA.Enabled = btnRsaSelect.Enabled = AllowedModes.HasFlag(CryptoMode.RSA);
+
             //Set checked controls
             cbUserAccount.Checked = cbUserAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.CryptUser);
-            cbComputerAccount.Checked = cbUserAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.CryptMachine);
-            cbKeyfile.Checked = cbUserAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.Keyfile);
-            cbPassword.Checked = cbUserAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.Password);
+            cbComputerAccount.Checked = cbComputerAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.CryptMachine);
+            cbKeyfile.Checked = cbKeyfile.Enabled && PreselectedModes.HasFlag(CryptoMode.Keyfile);
+            cbPassword.Checked = cbPassword.Enabled && PreselectedModes.HasFlag(CryptoMode.Password);
+            cbRSA.Checked = cbRSA.Enabled && PreselectedModes.HasFlag(CryptoMode.RSA);
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -65,6 +78,14 @@ namespace CryptoPad
                 Keyfile = tbKeyfile.Text;
                 Modes |= CryptoMode.Keyfile;
             }
+            if (RsaKey != null && cbKeyfile.Checked)
+            {
+                Modes |= CryptoMode.RSA;
+            }
+            else
+            {
+                RsaKey = null;
+            }
             if (cbUserAccount.Checked)
             {
                 Modes |= CryptoMode.CryptUser;
@@ -72,6 +93,34 @@ namespace CryptoPad
             if (cbComputerAccount.Checked)
             {
                 Modes |= CryptoMode.CryptMachine;
+            }
+        }
+
+        private void btnRsaSelect_Click(object sender, EventArgs e)
+        {
+            using (var F = new frmRSASelect(Settings.LoadRSAKeys(), true, RsaKey))
+            {
+                if (F.ShowDialog() == DialogResult.OK)
+                {
+                    cbRSA.Checked = true;
+                    RsaKey = F.SelectedKey;
+                    if (RsaKey == null)
+                    {
+                        lblRsaName.Text = "<No key selected>";
+                        cbRSA.Checked = false;
+                    }
+                    else
+                    {
+                        lblRsaName.Text = RsaKey.Name;
+                        if (!RSAEncryption.HasPrivateKey(RsaKey.Key))
+                        {
+                            Program.AlertMsg(
+                                "You picked a key that can only encrypt, not decrypt. " +
+                                "You will not be able to open the file again once you close it.\r\n" +
+                                "You should only do this if you're encrypting the file for someone else.");
+                        }
+                    }
+                }
             }
         }
     }

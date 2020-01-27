@@ -42,6 +42,9 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.ttMain = new System.Windows.Forms.ToolTip(this.components);
             this.OFD = new System.Windows.Forms.OpenFileDialog();
+            this.cbRSA = new System.Windows.Forms.CheckBox();
+            this.lblRsaName = new System.Windows.Forms.Label();
+            this.btnRsaSelect = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cbUserAccount
@@ -58,7 +61,7 @@
             // cbComputerAccount
             // 
             this.cbComputerAccount.AutoSize = true;
-            this.cbComputerAccount.Location = new System.Drawing.Point(12, 87);
+            this.cbComputerAccount.Location = new System.Drawing.Point(12, 90);
             this.cbComputerAccount.Name = "cbComputerAccount";
             this.cbComputerAccount.Size = new System.Drawing.Size(103, 17);
             this.cbComputerAccount.TabIndex = 2;
@@ -71,7 +74,7 @@
             // cbKeyfile
             // 
             this.cbKeyfile.AutoSize = true;
-            this.cbKeyfile.Location = new System.Drawing.Point(12, 111);
+            this.cbKeyfile.Location = new System.Drawing.Point(12, 117);
             this.cbKeyfile.Name = "cbKeyfile";
             this.cbKeyfile.Size = new System.Drawing.Size(57, 17);
             this.cbKeyfile.TabIndex = 3;
@@ -82,7 +85,7 @@
             // cbPassword
             // 
             this.cbPassword.AutoSize = true;
-            this.cbPassword.Location = new System.Drawing.Point(12, 135);
+            this.cbPassword.Location = new System.Drawing.Point(12, 144);
             this.cbPassword.Name = "cbPassword";
             this.cbPassword.Size = new System.Drawing.Size(72, 17);
             this.cbPassword.TabIndex = 6;
@@ -94,7 +97,7 @@
             // 
             this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnBrowse.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnBrowse.Location = new System.Drawing.Point(478, 107);
+            this.btnBrowse.Location = new System.Drawing.Point(478, 113);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(75, 23);
             this.btnBrowse.TabIndex = 5;
@@ -106,7 +109,7 @@
             // 
             this.tbKeyfile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbKeyfile.Location = new System.Drawing.Point(122, 109);
+            this.tbKeyfile.Location = new System.Drawing.Point(122, 115);
             this.tbKeyfile.Name = "tbKeyfile";
             this.tbKeyfile.Size = new System.Drawing.Size(350, 20);
             this.tbKeyfile.TabIndex = 4;
@@ -116,7 +119,7 @@
             // 
             this.tbPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPassword.Location = new System.Drawing.Point(122, 136);
+            this.tbPassword.Location = new System.Drawing.Point(122, 145);
             this.tbPassword.Name = "tbPassword";
             this.tbPassword.Size = new System.Drawing.Size(350, 20);
             this.tbPassword.TabIndex = 7;
@@ -138,10 +141,10 @@
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(397, 172);
+            this.btnOK.Location = new System.Drawing.Point(397, 213);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 8;
+            this.btnOK.TabIndex = 11;
             this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -150,10 +153,10 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(478, 172);
+            this.btnCancel.Location = new System.Drawing.Point(478, 213);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 9;
+            this.btnCancel.TabIndex = 12;
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
@@ -167,18 +170,52 @@
             this.ttMain.UseAnimation = false;
             this.ttMain.UseFading = false;
             // 
+            // cbRSA
+            // 
+            this.cbRSA.AutoSize = true;
+            this.cbRSA.Location = new System.Drawing.Point(12, 171);
+            this.cbRSA.Name = "cbRSA";
+            this.cbRSA.Size = new System.Drawing.Size(69, 17);
+            this.cbRSA.TabIndex = 8;
+            this.cbRSA.Text = "RSA Key";
+            this.ttMain.SetToolTip(this.cbRSA, "Encrypts using the RSA algorithm\r\nMost useful to encrypt a file for someone else\r" +
+        "\n");
+            this.cbRSA.UseVisualStyleBackColor = true;
+            // 
+            // lblRsaName
+            // 
+            this.lblRsaName.AutoSize = true;
+            this.lblRsaName.Location = new System.Drawing.Point(119, 173);
+            this.lblRsaName.Name = "lblRsaName";
+            this.lblRsaName.Size = new System.Drawing.Size(96, 13);
+            this.lblRsaName.TabIndex = 9;
+            this.lblRsaName.Text = "<No key selected>";
+            // 
+            // btnRsaSelect
+            // 
+            this.btnRsaSelect.Location = new System.Drawing.Point(478, 173);
+            this.btnRsaSelect.Name = "btnRsaSelect";
+            this.btnRsaSelect.Size = new System.Drawing.Size(75, 23);
+            this.btnRsaSelect.TabIndex = 10;
+            this.btnRsaSelect.Text = "&Select...";
+            this.btnRsaSelect.UseVisualStyleBackColor = true;
+            this.btnRsaSelect.Click += new System.EventHandler(this.btnRsaSelect_Click);
+            // 
             // frmCryptoModeSelect
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(565, 207);
+            this.ClientSize = new System.Drawing.Size(565, 248);
+            this.Controls.Add(this.btnRsaSelect);
+            this.Controls.Add(this.lblRsaName);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.lblInfo);
             this.Controls.Add(this.tbPassword);
             this.Controls.Add(this.tbKeyfile);
+            this.Controls.Add(this.cbRSA);
             this.Controls.Add(this.btnBrowse);
             this.Controls.Add(this.cbPassword);
             this.Controls.Add(this.cbKeyfile);
@@ -210,5 +247,8 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ToolTip ttMain;
         private System.Windows.Forms.OpenFileDialog OFD;
+        private System.Windows.Forms.CheckBox cbRSA;
+        private System.Windows.Forms.Label lblRsaName;
+        private System.Windows.Forms.Button btnRsaSelect;
     }
 }
