@@ -212,6 +212,8 @@ namespace CryptoPad
             {
                 return new AesCryptoData()
                 {
+                    IV = null,
+                    Salt = null,
                     Data = RSAEncryption.Encrypt(Params, Data)
                 };
             }
@@ -484,6 +486,10 @@ namespace CryptoPad
     [Flags]
     public enum CryptoMode : int
     {
+        /// <summary>
+        /// Represents all possible methods. Not to be used directly by the user
+        /// </summary>
+        _ALL = CryptUser | CryptMachine | Password | Keyfile | RSA,
         /// <summary>
         /// Encryption bound to the current user account.
         /// To decrypt, the same account is needed.

@@ -8,15 +8,15 @@ namespace CryptoPad
     public partial class frmRSASelect : Form
     {
         public RSAKey SelectedKey { get; private set; }
-        public RSAKey[] AllKeys { get; private set; }
+        public List<RSAKey> AllKeys { get; private set; }
 
         public frmRSASelect(IEnumerable<RSAKey> Keys, bool CanCreate, RSAKey PreSelected = null)
         {
             if (Keys == null)
             {
-                AllKeys = new RSAKey[0];
+                AllKeys = new List<RSAKey>();
             }
-            AllKeys = Keys.ToArray();
+            AllKeys = Keys.ToList();
 
             InitializeComponent();
 
@@ -40,7 +40,7 @@ namespace CryptoPad
             }
             if (PreSelected != null)
             {
-                for (var i = 0; i < AllKeys.Length; i++)
+                for (var i = 0; i < AllKeys.Count; i++)
                 {
                     if (AllKeys[i] == PreSelected)
                     {
@@ -48,6 +48,31 @@ namespace CryptoPad
                         break;
                     }
                 }
+            }
+        }
+
+        private void btnCreate_Click(object sender, EventArgs e)
+        {
+            using (var F = new frmRsaGen())
+            {
+                if (F.ShowDialog() == DialogResult.OK)
+                {
+                    var Key = RSAEncryption.GenerateKey(F.KeyName, F.KeySize);
+                    AllKeys.Add(Key);
+                    InitList(Key);
+                }
+            }
+        }
+
+        private void cbKey_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbKey.SelectedIndex >= 0)
+            {
+                SelectedKey = ((KeyLabel)cbKey.SelectedItem).Key;
+            }
+            else
+            {
+                SelectedKey = null;
             }
         }
 
@@ -59,11 +84,6 @@ namespace CryptoPad
             {
                 return Key.Name;
             }
-        }
-
-        private void btnCreate_Click(object sender, EventArgs e)
-        {
-            //TODO: Create form
         }
     }
 }

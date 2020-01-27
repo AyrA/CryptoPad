@@ -56,6 +56,7 @@
             this.cbKey.Name = "cbKey";
             this.cbKey.Size = new System.Drawing.Size(275, 21);
             this.cbKey.TabIndex = 1;
+            this.cbKey.SelectedIndexChanged += new System.EventHandler(this.cbKey_SelectedIndexChanged);
             // 
             // lblKey
             // 

@@ -27,6 +27,18 @@ namespace CryptoPad
         public AesCryptoData Data { get; set; }
 
         /// <summary>
+        /// Gets all modes as a single <see cref="CryptoMode"/> flag
+        /// </summary>
+        /// <remarks>This property is automatically generated</remarks>
+        public CryptoMode AllModes
+        {
+            get
+            {
+                return Providers == null ? 0 : (CryptoMode)Providers.Sum(m => (int)m.Mode);
+            }
+        }
+
+        /// <summary>
         /// AES key used to encrypt <see cref="Data"/>
         /// </summary>
         /// <remarks>

@@ -16,7 +16,7 @@ namespace CryptoPad
             {
                 throw new Exception($"{VarType.Name} is not an enumeration with the Flags attribute");
             }
-            return Enum.GetValues(VarType).OfType<T>().Where(m => (IntVal(m) & Val) != 0).ToArray();
+            return Enum.GetValues(VarType).OfType<T>().Where(m => (IntVal(m) & Val) == IntVal(m)).ToArray();
         }
 
         private static int IntVal(object someEnum)

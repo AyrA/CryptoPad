@@ -51,6 +51,12 @@
     <Compile Include="AppSettings.cs" />
     <Compile Include="EncryptedData.cs" />
     <Compile Include="Encryption.cs" />
+    <Compile Include="UI\frmRsaGen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\frmRsaGen.Designer.cs">
+      <DependentUpon>frmRsaGen.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\frmCryptoInput.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,6 +87,9 @@
     <Compile Include="RSAEncryption.cs" />
     <Compile Include="RSAKey.cs" />
     <Compile Include="Tools.cs" />
+    <EmbeddedResource Include="UI\frmRsaGen.resx">
+      <DependentUpon>frmRsaGen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\frmCryptoInput.resx">
       <DependentUpon>frmCryptoInput.cs</DependentUpon>
     </EmbeddedResource>

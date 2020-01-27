@@ -97,7 +97,7 @@ namespace CryptoPad
 
         private void NewText()
         {
-            if (!HasChange || SaveText(false))
+            if (!HasChange || SaveText(false, HasChange))
             {
                 tbEditor.Text = FileName = BaseContent = string.Empty;
                 FileParams.Clear();
@@ -106,8 +106,20 @@ namespace CryptoPad
             }
         }
 
-        private bool SaveText(bool SaveAs)
+        private bool SaveText(bool SaveAs, bool AskToSave)
         {
+            if (AskToSave)
+            {
+                var dlgresult = Program.AlertMsg("Save changes to the current file?", true, true);
+                if (dlgresult == DialogResult.No)
+                {
+                    return true;
+                }
+                if (dlgresult == DialogResult.Cancel)
+                {
+                    return false;
+                }
+            }
             if ((!string.IsNullOrEmpty(FileName) && !SaveAs) || dlgSave.ShowDialog() == DialogResult.OK)
             {
                 if (CurrentFile == null)
@@ -177,7 +189,7 @@ namespace CryptoPad
         {
             byte[] Data = null;
             EncryptedData TempFile = null;
-            if (!HasChange || SaveText(false))
+            if (!HasChange || SaveText(false, HasChange))
             {
                 if (dlgOpen.ShowDialog() == DialogResult.OK)
                 {
@@ -187,26 +199,32 @@ namespace CryptoPad
                         try
                         {
                             Data = Encryption.Decrypt(TempFile);
+                            Debug.WriteLine("Decrypted using parameterless provider");
                         }
                         catch
                         {
+                            Debug.WriteLine("Parameterless provider could not decrypt the file");
                             if (TempFile.HasProvider(CryptoMode.RSA))
                             {
                                 //Try all RSA keys until one succeeds
                                 foreach (var K in Settings.LoadRSAKeys().Where(m => RSAEncryption.HasPrivateKey(m.Key)))
                                 {
-                                    FileParams[CryptoMode.RSA] = K;
+                                    FileParams[CryptoMode.RSA] = K.Key;
                                     try
                                     {
                                         Data = Encryption.Decrypt(TempFile, FileParams);
+                                        Debug.WriteLine($"Decrypted using RSA provider and key: {K.Name}");
+                                        break;
                                     }
                                     catch
                                     {
+                                        Debug.WriteLine($"Key failed: {K.Name}");
                                         //Try next key
                                     }
                                 }
                                 if (Data == null)
                                 {
+                                    Debug.WriteLine($"No RSA key could decrypt the content");
                                     FileParams.Remove(CryptoMode.RSA);
                                 }
                             }
@@ -214,7 +232,7 @@ namespace CryptoPad
                             {
                                 if (TempFile.HasProvider(CryptoMode.Keyfile) || TempFile.HasProvider(CryptoMode.Password))
                                 {
-                                    using (var pwd = new frmCryptoInput((CryptoMode)TempFile.Providers.Sum(m => (int)m.Mode), null))
+                                    using (var pwd = new frmCryptoInput(TempFile.AllModes, null))
                                     {
                                         if (pwd.ShowDialog() == DialogResult.OK)
                                         {
@@ -253,6 +271,12 @@ namespace CryptoPad
                                             }
                                         }
                                     }
+                                }
+                                else if (TempFile.HasProvider(CryptoMode.RSA))
+                                {
+                                    Program.AlertMsg(
+                                        "The file is encrypted using RSA but none of your keys can decrypt it.\r\n" +
+                                        "Please add the matching RSA private key to the key store using the \"Tools >> Options\" Menu");
                                 }
                                 else
                                 {
@@ -309,7 +333,7 @@ namespace CryptoPad
                         e.SuppressKeyPress = true;
                         break;
                     case Keys.S:
-                        SaveText(false);
+                        SaveText(false, false);
                         e.Handled = true;
                         e.SuppressKeyPress = true;
                         break;
@@ -369,7 +393,7 @@ namespace CryptoPad
                 switch (Program.AlertMsg(msg, true, canCancel))
                 {
                     case DialogResult.Yes:
-                        if (!SaveText(false))
+                        if (!SaveText(false, false))
                         {
                             frmMain_FormClosing(sender, e);
                         }
@@ -390,12 +414,12 @@ namespace CryptoPad
             {
                 if (Program.InfoMsg("To set the encryption mode for a new file you have to save it first. Save now?", true) == DialogResult.Yes)
                 {
-                    SaveText(false);
+                    SaveText(false, false);
                 }
             }
             else
             {
-                using (var dlgModes = new frmCryptoModeSelect(Settings))
+                using (var dlgModes = new frmCryptoModeSelect(Settings, PreselectedModes: CurrentFile.AllModes))
                 {
                     if (dlgModes.ShowDialog() == DialogResult.OK)
                     {
@@ -414,12 +438,16 @@ namespace CryptoPad
                             {
                                 Params[CryptoMode.Keyfile] = dlgModes.Keyfile;
                             }
+                            if (dlgModes.Modes.HasFlag(CryptoMode.RSA))
+                            {
+                                Params[CryptoMode.RSA] = dlgModes.RsaKey.Key;
+                            }
                             try
                             {
                                 CurrentFile = Encryption.Encrypt(dlgModes.Modes, Encoding.UTF8.GetBytes(tbEditor.Text), Params);
                                 if (Program.InfoMsg("The cryptographic modes were changed. Save the file now?", true) == DialogResult.Yes)
                                 {
-                                    SaveText(false);
+                                    SaveText(false, false);
                                 }
                             }
                             catch (Exception ex)
@@ -451,12 +479,12 @@ namespace CryptoPad
 
         private void SaveAction_Click(object sender, EventArgs e)
         {
-            SaveText(false);
+            SaveText(false, false);
         }
 
         private void SaveAsAction_Click(object sender, EventArgs e)
         {
-            SaveText(true);
+            SaveText(true, false);
         }
 
         private void CopyAction_Click(object sender, EventArgs e)

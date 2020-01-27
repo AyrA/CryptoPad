@@ -227,7 +227,7 @@ namespace CryptoPad
             using (var Alg = RSA.Create())
             {
                 Alg.ImportParameters(Key);
-                return Alg.Encrypt(Data, RSAEncryptionPadding.OaepSHA256);
+                return Alg.Encrypt(Data, RSAEncryptionPadding.Pkcs1);
             }
         }
 
@@ -241,7 +241,7 @@ namespace CryptoPad
             using (var Alg = RSA.Create())
             {
                 Alg.ImportParameters(Key);
-                return Alg.Decrypt(Data, RSAEncryptionPadding.OaepSHA256);
+                return Alg.Decrypt(Data, RSAEncryptionPadding.Pkcs1);
             }
         }
 

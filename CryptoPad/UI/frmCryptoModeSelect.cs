@@ -25,7 +25,7 @@ namespace CryptoPad
 
         private AppSettings Settings;
 
-        public frmCryptoModeSelect(AppSettings Settings, CryptoMode AllowedModes = (CryptoMode)~0, CryptoMode PreselectedModes = 0)
+        public frmCryptoModeSelect(AppSettings Settings, CryptoMode AllowedModes = CryptoMode._ALL, CryptoMode PreselectedModes = 0)
         {
             InitializeComponent();
 
@@ -78,7 +78,7 @@ namespace CryptoPad
                 Keyfile = tbKeyfile.Text;
                 Modes |= CryptoMode.Keyfile;
             }
-            if (RsaKey != null && cbKeyfile.Checked)
+            if (RsaKey != null && cbRSA.Checked)
             {
                 Modes |= CryptoMode.RSA;
             }
@@ -121,6 +121,7 @@ namespace CryptoPad
                         }
                     }
                 }
+                Settings.SaveRSAKeys(F.AllKeys, true);
             }
         }
     }
