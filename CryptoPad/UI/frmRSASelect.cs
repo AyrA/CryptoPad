@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace CryptoPad
@@ -27,9 +28,9 @@ namespace CryptoPad
 
         private void InitList(RSAKey PreSelected)
         {
+            AllKeys.Sort((a, b) => string.Compare(a.Name, b.Name));
             var ObjList = AllKeys
                 .Select(m => new KeyLabel() { Key = m })
-                .OrderBy(m => m.Key.Name)
                 .Cast<object>()
                 .ToArray();
             cbKey.Items.Clear();
@@ -42,7 +43,7 @@ namespace CryptoPad
             {
                 for (var i = 0; i < AllKeys.Count; i++)
                 {
-                    if (AllKeys[i] == PreSelected)
+                    if (AllKeys[i].Equals(PreSelected))
                     {
                         cbKey.SelectedIndex = i;
                         break;
@@ -57,9 +58,22 @@ namespace CryptoPad
             {
                 if (F.ShowDialog() == DialogResult.OK)
                 {
-                    var Key = RSAEncryption.GenerateKey(F.KeyName, F.KeySize);
-                    AllKeys.Add(Key);
-                    InitList(Key);
+                    var Props = new { F.KeyName, F.KeySize };
+                    foreach (var C in Controls) { ((Control)C).Enabled = false; }
+                    pbKeygen.Visible = true;
+                    Thread T = new Thread(delegate ()
+                    {
+                        var Key = RSAEncryption.GenerateKey(F.KeyName, F.KeySize);
+                        AllKeys.Add(Key);
+                        Invoke((MethodInvoker)delegate
+                        {
+                            foreach (var C in Controls) { ((Control)C).Enabled = true; }
+                            pbKeygen.Visible = false;
+                            InitList(Key);
+                        });
+                    });
+                    T.IsBackground = true;
+                    T.Start();
                 }
             }
         }
@@ -83,6 +97,15 @@ namespace CryptoPad
             public override string ToString()
             {
                 return Key.Name;
+            }
+        }
+
+        private void frmRSASelect_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //Don't allow the user to close the form while the key generator is running
+            if (e.Cancel = e.CloseReason == CloseReason.UserClosing && pbKeygen.Visible)
+            {
+                Program.AlertMsg("Please wait for the key generator to finish. This usually takes a few seconds");
             }
         }
     }

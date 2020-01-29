@@ -33,6 +33,7 @@
             this.lblKey = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.pbKeygen = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // btnCreate
@@ -89,6 +90,17 @@
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // pbKeygen
+            // 
+            this.pbKeygen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbKeygen.Location = new System.Drawing.Point(15, 54);
+            this.pbKeygen.Name = "pbKeygen";
+            this.pbKeygen.Size = new System.Drawing.Size(247, 23);
+            this.pbKeygen.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.pbKeygen.TabIndex = 5;
+            this.pbKeygen.Visible = false;
+            // 
             // frmRSASelect
             // 
             this.AcceptButton = this.btnOK;
@@ -96,6 +108,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(436, 89);
+            this.Controls.Add(this.pbKeygen);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.lblKey);
@@ -108,6 +121,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "RSA Key Selection";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmRSASelect_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -120,5 +134,6 @@
         private System.Windows.Forms.Label lblKey;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.ProgressBar pbKeygen;
     }
 }

@@ -41,8 +41,8 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.ttMain = new System.Windows.Forms.ToolTip(this.components);
-            this.OFD = new System.Windows.Forms.OpenFileDialog();
             this.cbRSA = new System.Windows.Forms.CheckBox();
+            this.OFD = new System.Windows.Forms.OpenFileDialog();
             this.lblRsaName = new System.Windows.Forms.Label();
             this.btnRsaSelect = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -131,11 +131,10 @@
             this.lblInfo.AutoSize = true;
             this.lblInfo.Location = new System.Drawing.Point(12, 9);
             this.lblInfo.Name = "lblInfo";
-            this.lblInfo.Size = new System.Drawing.Size(281, 39);
+            this.lblInfo.Size = new System.Drawing.Size(259, 39);
             this.lblInfo.TabIndex = 0;
-            this.lblInfo.Text = "Select all methods available for decryption.\r\nAny single one of these will be ava" +
-    "ilable to decrypt the file.\r\nHover over the check boxes to get further informati" +
-    "on";
+            this.lblInfo.Text = "Select all methods available for decryption.\r\nAny single one of these will be abl" +
+    "e to decrypt the file.\r\nHover over the check boxes to get further information";
             // 
             // btnOK
             // 
@@ -227,7 +226,7 @@
             this.Name = "frmCryptoModeSelect";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Crypto mode selection";
+            this.Text = "Encryption mode selection";
             this.ResumeLayout(false);
             this.PerformLayout();
 

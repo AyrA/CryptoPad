@@ -201,9 +201,9 @@ namespace CryptoPad
 
         public static RSAKey GenerateKey(string Name, int Size = DEFAULT_KEYSIZE)
         {
-            using (var Alg = RSA.Create())
+            using (var Alg = new RSACryptoServiceProvider(Size))
             {
-                Alg.KeySize = Size;
+                Alg.PersistKeyInCsp = false;
                 return new RSAKey(Name, Alg.ExportParameters(true));
             }
         }
