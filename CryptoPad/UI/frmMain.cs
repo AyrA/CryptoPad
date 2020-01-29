@@ -569,5 +569,13 @@ namespace CryptoPad
                 Debug.WriteLine($"Unable to save settings on exit: {ex.Message}");
             }
         }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var frm = new frmSettings(Settings))
+            {
+                frm.ShowDialog();
+            }
+        }
     }
 }
