@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CryptoPad
@@ -21,9 +23,186 @@ namespace CryptoPad
             foreach (var Key in Settings.LoadRSAKeys())
             {
                 var Item = lvRSA.Items.Add(Key.Name);
+                Item.Tag = Key;
                 Item.SubItems.Add((Key.Key.Modulus.Length * 8).ToString());
                 Item.SubItems.Add(RSAEncryption.HasPublicKey(Key.Key) ? "Yes" : "No");
                 Item.SubItems.Add(RSAEncryption.HasPrivateKey(Key.Key) ? "Yes" : "No");
+            }
+        }
+
+        private void btnBackup_Click(object sender, EventArgs e)
+        {
+            const string ExportAlert =
+                "You're about to export at least one RSA key that has private key information.\r\n" +
+                "Under no circumstances should you share those keys with anybody, regardless of what they tell you.\r\nContinue?";
+            if (lvRSA.SelectedItems.Count > 0)
+            {
+                var Keys = lvRSA.SelectedItems
+                    .OfType<ListViewItem>()
+                    .Select(m => (RSAKey)m.Tag)
+                    .ToArray();
+                if (!Keys.Any(m => RSAEncryption.HasPrivateKey(m.Key)) || Program.AlertMsg(ExportAlert, true) == DialogResult.Yes)
+                {
+                    if (lvRSA.SelectedItems.Count == 1)
+                    {
+                        SFD.FileName = Tools.SanitizeName(Keys[0].Name + ".rsa");
+                        if (SFD.ShowDialog() == DialogResult.OK)
+                        {
+                            try
+                            {
+                                System.IO.File.WriteAllText(SFD.FileName, Keys[0].ToXML());
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.ErrorMsg("Unable to back up your key. Error:\r\n" + ex.Message);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (FBD.ShowDialog() == DialogResult.OK)
+                        {
+                            foreach (var K in Keys)
+                            {
+                                try
+                                {
+                                    System.IO.File.WriteAllText(Tools.UniqueName(FBD.SelectedPath, Tools.SanitizeName(K.Name + ".rsa")), K.ToXML());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Program.ErrorMsg($"Unable to back up your key named {K.Name}. Error:\r\n{ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Program.AlertMsg("Please select at least one key");
+            }
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            const string ExportAlert =
+                "You're about to export only the public RSA key parts.\r\n" +
+                "This key will allow encryption only and is meant for sharing with other people and not creating backups.\r\nContinue?";
+            if (lvRSA.SelectedItems.Count > 0)
+            {
+                var Keys = lvRSA.SelectedItems
+                    .OfType<ListViewItem>()
+                    .Select(m => RSAEncryption.StripPrivate((RSAKey)m.Tag))
+                    .ToArray();
+                if (Program.AlertMsg(ExportAlert, true) == DialogResult.Yes)
+                {
+                    if (lvRSA.SelectedItems.Count == 1)
+                    {
+                        SFD.FileName = Tools.SanitizeName(Keys[0].Name + ".rsa");
+                        if (SFD.ShowDialog() == DialogResult.OK)
+                        {
+                            try
+                            {
+                                System.IO.File.WriteAllText(SFD.FileName, Keys[0].ToXML());
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.ErrorMsg("Unable to export your key. Error:\r\n" + ex.Message);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (FBD.ShowDialog() == DialogResult.OK)
+                        {
+                            foreach (var K in Keys)
+                            {
+                                try
+                                {
+                                    System.IO.File.WriteAllText(Tools.UniqueName(FBD.SelectedPath, Tools.SanitizeName(K.Name + ".rsa")), K.ToXML());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Program.ErrorMsg($"Unable to export your key named {K.Name}. Error:\r\n{ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Program.AlertMsg("Please select at least one key");
+            }
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            if (OFD.ShowDialog() == DialogResult.OK)
+            {
+                var Keys = Settings.LoadRSAKeys();
+                var NewKeys = new List<RSAKey>();
+                foreach (var Name in OFD.FileNames)
+                {
+                    try
+                    {
+                        var Key = Tools.FromXML<RSAKey>(System.IO.File.ReadAllText(Name));
+                        if (!Key.IsValid())
+                        {
+                            throw new Exception("The loaded RSA key is not valid");
+                        }
+                        //Check if the key exists as-is
+                        if (!Keys.Any(m => m.Equals(Key)))
+                        {
+                            //Check if the key has a private key
+                            if (RSAEncryption.HasPrivateKey(Key.Key))
+                            {
+                                //Check if any existing keys have the same public key
+                                for (var i = 0; i < Keys.Length; i++)
+                                {
+                                    //Replace existing key with imported key if the imported key has a private key
+                                    if (Keys[i].IsSamePublicKey(Key))
+                                    {
+                                        Keys[i] = Key;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //Key does not exists and has no private key. Just add it.
+                                NewKeys.Add(Key);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.ErrorMsg("Unable to import your key. Error:\r\n" + ex.Message);
+                    }
+                }
+                Settings.SaveRSAKeys(Keys.Concat(NewKeys), true);
+                //Render new RSA key list
+                InitRSA();
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (lvRSA.SelectedItems.Count > 0)
+            {
+                if (Program.AlertMsg("Really delete all selected keys? This can't be undone and you will lose access to any file encrypted with them", true) == DialogResult.Yes)
+                {
+                    var SelectedKeys = lvRSA.SelectedItems
+                        .OfType<ListViewItem>()
+                        .Select(m => (RSAKey)m.Tag)
+                        .ToArray();
+                    var AllKeys = Settings.LoadRSAKeys().ToList();
+                    foreach (var K in SelectedKeys)
+                    {
+                        AllKeys.Remove(K);
+                    }
+                    Settings.SaveRSAKeys(AllKeys, true);
+                    InitRSA();
+                }
             }
         }
     }

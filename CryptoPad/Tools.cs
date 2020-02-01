@@ -8,6 +8,12 @@ namespace CryptoPad
 {
     public static class Tools
     {
+        /// <summary>
+        /// Converts an enum made of multiple values into individual values
+        /// </summary>
+        /// <typeparam name="T">Enum type</typeparam>
+        /// <param name="Values">Enum values</param>
+        /// <returns>Seperated values</returns>
         public static T[] FlagsToArray<T>(T Values) where T : struct
         {
             var VarType = typeof(T);
@@ -19,6 +25,67 @@ namespace CryptoPad
             return Enum.GetValues(VarType).OfType<T>().Where(m => (IntVal(m) & Val) == IntVal(m)).ToArray();
         }
 
+        /// <summary>
+        /// Removes invalid characters from a file name
+        /// </summary>
+        /// <param name="Filename">File name</param>
+        /// <param name="Replacement">Replacement character</param>
+        /// <returns>Sanitized file name</returns>
+        public static string SanitizeName(string Filename, char Replacement = '_')
+        {
+            //Handle missing/invalid names
+            if (string.IsNullOrEmpty(Filename) || Filename == "." || Filename == "..")
+            {
+                return Replacement.ToString();
+            }
+            var Invalids =
+                //Disallow known bad characters
+                Path.GetInvalidFileNameChars()
+                //Disallow DEL char
+                .Concat("\x7F".ToCharArray())
+                //Disallow control characters
+                .Concat(Enumerable.Range(0, 0x1F).Select(n => (char)n))
+                .ToArray();
+            //Run through the file name string only once
+            var Name = Filename
+                .Select(m => Invalids.Contains(m) ? Replacement : m)
+                .ToArray();
+            return new string(Name);
+        }
+
+        /// <summary>
+        /// Combines a file name and path information into a unique name
+        /// </summary>
+        /// <param name="Directory">Base directory</param>
+        /// <param name="Filename">Base file name</param>
+        /// <returns>Unique name</returns>
+        /// <remarks>
+        /// - Tries to use Directory+Filename first as-is.
+        /// - Tries to make a name unique by adding numbers.
+        /// - Does not guarantee that the name will stay unique.
+        /// </remarks>
+        public static string UniqueName(string Directory, string Filename)
+        {
+            string Basename = Path.Combine(Directory, Filename);
+            int ctr = 0;
+            string ext = Path.GetExtension(Filename);
+            string nameonly = Path.GetFileNameWithoutExtension(Filename);
+            while (File.Exists(Basename))
+            {
+                ++ctr;
+                Basename = Path.Combine(Directory, $"{nameonly}_{ctr}{ext}");
+            }
+            return Basename;
+        }
+
+        /// <summary>
+        /// Tries to cast an enum of unknown type to an integer
+        /// </summary>
+        /// <param name="someEnum">Enum value</param>
+        /// <returns>Integer value</returns>
+        /// <remarks>
+        /// Will throw if the supplied value is not an enumeration or otherwise can be casted to an integer
+        /// </remarks>
         private static int IntVal(object someEnum)
         {
             if (someEnum == null)

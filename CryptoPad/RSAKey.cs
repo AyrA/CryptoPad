@@ -33,6 +33,17 @@ namespace CryptoPad
             Key = Params;
         }
 
+        public bool IsSamePublicKey(RSAKey K)
+        {
+            return IsSamePublicKey(K.Key);
+        }
+
+        public bool IsSamePublicKey(RSAParameters K)
+        {
+            return Key.Modulus.SequenceEqual(K.Modulus)
+                && Key.Exponent.SequenceEqual(K.Exponent);
+        }
+
         public bool IsValid()
         {
             return RSAEncryption.HasPrivateKey(Key) || RSAEncryption.HasPublicKey(Key);
