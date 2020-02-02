@@ -30,6 +30,9 @@
         {
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSettings = new System.Windows.Forms.TabPage();
+            this.flowPanelMode = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblModeDesc = new System.Windows.Forms.Label();
+            this.lblMode = new System.Windows.Forms.LinkLabel();
             this.tabRSA = new System.Windows.Forms.TabPage();
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnImport = new System.Windows.Forms.Button();
@@ -44,7 +47,11 @@
             this.OFD = new System.Windows.Forms.OpenFileDialog();
             this.SFD = new System.Windows.Forms.SaveFileDialog();
             this.FBD = new System.Windows.Forms.FolderBrowserDialog();
+            this.btnNew = new System.Windows.Forms.Button();
+            this.pbGenerator = new System.Windows.Forms.ProgressBar();
             this.tabs.SuspendLayout();
+            this.tabSettings.SuspendLayout();
+            this.flowPanelMode.SuspendLayout();
             this.tabRSA.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -63,6 +70,7 @@
             // 
             // tabSettings
             // 
+            this.tabSettings.Controls.Add(this.flowPanelMode);
             this.tabSettings.Location = new System.Drawing.Point(4, 22);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.Padding = new System.Windows.Forms.Padding(3);
@@ -71,8 +79,38 @@
             this.tabSettings.Text = "General";
             this.tabSettings.UseVisualStyleBackColor = true;
             // 
+            // flowPanelMode
+            // 
+            this.flowPanelMode.Controls.Add(this.lblModeDesc);
+            this.flowPanelMode.Controls.Add(this.lblMode);
+            this.flowPanelMode.Location = new System.Drawing.Point(6, 12);
+            this.flowPanelMode.Name = "flowPanelMode";
+            this.flowPanelMode.Size = new System.Drawing.Size(550, 28);
+            this.flowPanelMode.TabIndex = 0;
+            // 
+            // lblModeDesc
+            // 
+            this.lblModeDesc.AutoSize = true;
+            this.lblModeDesc.Location = new System.Drawing.Point(3, 0);
+            this.lblModeDesc.Name = "lblModeDesc";
+            this.lblModeDesc.Size = new System.Drawing.Size(71, 13);
+            this.lblModeDesc.TabIndex = 0;
+            this.lblModeDesc.Text = "Current Mode";
+            // 
+            // lblMode
+            // 
+            this.lblMode.AutoSize = true;
+            this.lblMode.Location = new System.Drawing.Point(80, 0);
+            this.lblMode.Name = "lblMode";
+            this.lblMode.Size = new System.Drawing.Size(46, 13);
+            this.lblMode.TabIndex = 1;
+            this.lblMode.TabStop = true;
+            this.lblMode.Text = "<Mode>";
+            // 
             // tabRSA
             // 
+            this.tabRSA.Controls.Add(this.pbGenerator);
+            this.tabRSA.Controls.Add(this.btnNew);
             this.tabRSA.Controls.Add(this.btnDelete);
             this.tabRSA.Controls.Add(this.btnImport);
             this.tabRSA.Controls.Add(this.btnExport);
@@ -92,7 +130,7 @@
             this.btnDelete.Location = new System.Drawing.Point(481, 467);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(75, 23);
-            this.btnDelete.TabIndex = 4;
+            this.btnDelete.TabIndex = 5;
             this.btnDelete.Text = "&Delete...";
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
@@ -103,7 +141,7 @@
             this.btnImport.Location = new System.Drawing.Point(400, 467);
             this.btnImport.Name = "btnImport";
             this.btnImport.Size = new System.Drawing.Size(75, 23);
-            this.btnImport.TabIndex = 3;
+            this.btnImport.TabIndex = 4;
             this.btnImport.Text = "&Import...";
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
@@ -114,7 +152,7 @@
             this.btnExport.Location = new System.Drawing.Point(319, 467);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
-            this.btnExport.TabIndex = 2;
+            this.btnExport.TabIndex = 3;
             this.btnExport.Text = "&Export...";
             this.btnExport.UseVisualStyleBackColor = true;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
@@ -125,7 +163,7 @@
             this.btnBackup.Location = new System.Drawing.Point(238, 467);
             this.btnBackup.Name = "btnBackup";
             this.btnBackup.Size = new System.Drawing.Size(75, 23);
-            this.btnBackup.TabIndex = 1;
+            this.btnBackup.TabIndex = 2;
             this.btnBackup.Text = "&Backup...";
             this.btnBackup.UseVisualStyleBackColor = true;
             this.btnBackup.Click += new System.EventHandler(this.btnBackup_Click);
@@ -197,6 +235,28 @@
             // 
             this.FBD.Description = "Save multiple keys";
             // 
+            // btnNew
+            // 
+            this.btnNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnNew.Location = new System.Drawing.Point(157, 467);
+            this.btnNew.Name = "btnNew";
+            this.btnNew.Size = new System.Drawing.Size(75, 23);
+            this.btnNew.TabIndex = 1;
+            this.btnNew.Text = "&New...";
+            this.btnNew.UseVisualStyleBackColor = true;
+            this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
+            // 
+            // pbGenerator
+            // 
+            this.pbGenerator.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbGenerator.Location = new System.Drawing.Point(6, 467);
+            this.pbGenerator.Name = "pbGenerator";
+            this.pbGenerator.Size = new System.Drawing.Size(145, 23);
+            this.pbGenerator.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.pbGenerator.TabIndex = 6;
+            this.pbGenerator.Visible = false;
+            // 
             // frmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -212,7 +272,11 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "Options";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmSettings_FormClosing);
             this.tabs.ResumeLayout(false);
+            this.tabSettings.ResumeLayout(false);
+            this.flowPanelMode.ResumeLayout(false);
+            this.flowPanelMode.PerformLayout();
             this.tabRSA.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -236,5 +300,10 @@
         private System.Windows.Forms.OpenFileDialog OFD;
         private System.Windows.Forms.SaveFileDialog SFD;
         private System.Windows.Forms.FolderBrowserDialog FBD;
+        private System.Windows.Forms.FlowLayoutPanel flowPanelMode;
+        private System.Windows.Forms.Label lblModeDesc;
+        private System.Windows.Forms.LinkLabel lblMode;
+        private System.Windows.Forms.Button btnNew;
+        private System.Windows.Forms.ProgressBar pbGenerator;
     }
 }

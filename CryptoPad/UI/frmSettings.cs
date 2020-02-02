@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace CryptoPad
@@ -24,7 +25,7 @@ namespace CryptoPad
             {
                 var Item = lvRSA.Items.Add(Key.Name);
                 Item.Tag = Key;
-                Item.SubItems.Add((Key.Key.Modulus.Length * 8).ToString());
+                Item.SubItems.Add(Key.Size.ToString());
                 Item.SubItems.Add(RSAEncryption.HasPublicKey(Key.Key) ? "Yes" : "No");
                 Item.SubItems.Add(RSAEncryption.HasPrivateKey(Key.Key) ? "Yes" : "No");
             }
@@ -203,6 +204,43 @@ namespace CryptoPad
                     Settings.SaveRSAKeys(AllKeys, true);
                     InitRSA();
                 }
+            }
+        }
+
+        private void btnNew_Click(object sender, EventArgs e)
+        {
+            using (var Keygen = new frmRsaGen())
+            {
+                if (Keygen.ShowDialog() == DialogResult.OK)
+                {
+                    var Props = new { Keygen.KeyName, Keygen.KeySize };
+                    foreach (var C in Controls) { ((Control)C).Enabled = false; }
+                    pbGenerator.Visible = true;
+                    Thread T = new Thread(delegate ()
+                    {
+                        var Key = RSAEncryption.GenerateKey(Props.KeyName, Props.KeySize);
+                        Invoke((MethodInvoker)delegate
+                        {
+                            var Keys = Settings.LoadRSAKeys().ToList();
+                            Keys.Add(Key);
+                            foreach (var C in Controls) { ((Control)C).Enabled = true; }
+                            pbGenerator.Visible = false;
+                            Settings.SaveRSAKeys(Keys, true);
+                            InitRSA();
+                        });
+                    });
+                    T.IsBackground = true;
+                    T.Start();
+                }
+            }
+        }
+
+        private void frmSettings_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //Don't allow the user to close the form while the key generator is running
+            if (e.Cancel = e.CloseReason == CloseReason.UserClosing && pbGenerator.Visible)
+            {
+                Program.AlertMsg("Please wait for the key generator to finish. This usually takes only a few seconds");
             }
         }
     }
