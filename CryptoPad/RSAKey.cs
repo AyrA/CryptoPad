@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Xml.Serialization;
 
 namespace CryptoPad
 {
@@ -10,7 +11,17 @@ namespace CryptoPad
         private const int BASE_HASHCODE = 0x6EDC1C5E;
 
         public string Name { get; set; }
+
         public RSAParameters Key { get; set; }
+
+        [XmlIgnore]
+        public int Size
+        {
+            get
+            {
+                return Key.Modulus.Length * 8;
+            }
+        }
 
         public RSAKey()
         {

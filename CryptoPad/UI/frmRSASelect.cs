@@ -63,7 +63,7 @@ namespace CryptoPad
                     pbKeygen.Visible = true;
                     Thread T = new Thread(delegate ()
                     {
-                        var Key = RSAEncryption.GenerateKey(F.KeyName, F.KeySize);
+                        var Key = RSAEncryption.GenerateKey(Props.KeyName, Props.KeySize);
                         AllKeys.Add(Key);
                         Invoke((MethodInvoker)delegate
                         {
@@ -90,22 +90,22 @@ namespace CryptoPad
             }
         }
 
-        private struct KeyLabel
-        {
-            public RSAKey Key;
-
-            public override string ToString()
-            {
-                return Key.Name;
-            }
-        }
-
         private void frmRSASelect_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Don't allow the user to close the form while the key generator is running
             if (e.Cancel = e.CloseReason == CloseReason.UserClosing && pbKeygen.Visible)
             {
                 Program.AlertMsg("Please wait for the key generator to finish. This usually takes a few seconds");
+            }
+        }
+
+        private struct KeyLabel
+        {
+            public RSAKey Key;
+
+            public override string ToString()
+            {
+                return $"{Key.Name} ({Key.Size} bits)";
             }
         }
     }
