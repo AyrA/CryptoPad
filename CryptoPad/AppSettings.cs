@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -16,6 +15,9 @@ namespace CryptoPad
     {
         [XmlIgnore]
         public string KeyStorage { get; private set; }
+
+        [XmlIgnore]
+        public SettingsType Type { get; private set; }
 
         public Size WindowSize { get; set; }
 
@@ -28,6 +30,8 @@ namespace CryptoPad
         public string FontName { get; set; }
         public float FontSize { get; set; }
         public FontStyle FontStyle { get; set; }
+
+        public Restrictions Restrictions { get; set; }
 
         public static string PortableSettingsFile
         {
@@ -63,6 +67,8 @@ namespace CryptoPad
             EditorBackgroundColor = new ColorCode(Color.FromKnownColor(KnownColor.Window).Name);
 
             SetFont(SystemFonts.DefaultFont);
+
+            Type = SettingsType.Local;
         }
 
         public RSAKey[] LoadRSAKeys()
@@ -160,6 +166,9 @@ namespace CryptoPad
                 //Portable settings win over all others
                 var Settings = Tools.FromXML<AppSettings>(File.ReadAllText(PortableSettingsFile));
                 Settings.KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
+                Settings.Type = SettingsType.Portable;
+                //Don't allow restrictions in portable mode
+                Settings.Restrictions = null;
                 return Settings;
             }
             catch (Exception ex)
@@ -172,6 +181,7 @@ namespace CryptoPad
             {
                 ASGlobal = Tools.FromXML<AppSettings>(File.ReadAllText(GlobalSettingsFile));
                 ASGlobal.KeyStorage = Path.Combine(Path.GetDirectoryName(GlobalSettingsFile), "Keys");
+                ASGlobal.Type = SettingsType.Global;
             }
             catch (Exception ex)
             {
@@ -181,6 +191,9 @@ namespace CryptoPad
             {
                 ASLocal = Tools.FromXML<AppSettings>(File.ReadAllText(UserSettingsFile));
                 ASLocal.KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
+                ASLocal.Type = SettingsType.Local;
+                //Ignore restrictions in local file
+                ASLocal.Restrictions = null;
             }
             catch (Exception ex)
             {
@@ -191,12 +204,19 @@ namespace CryptoPad
             {
                 if (ASLocal == null)
                 {
+                    Debug.WriteLine($"No settings present. Probably first run");
+                    //Invent new local settings
                     return new AppSettings()
                     {
-                        KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys")
+                        KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys"),
+                        Type = SettingsType.Local
                     };
                 }
                 return ASLocal;
+            }
+            if (ASGlobal.Restrictions == null)
+            {
+                ASGlobal.Restrictions = new Restrictions();
             }
             return ASGlobal;
         }
@@ -221,6 +241,36 @@ namespace CryptoPad
             File.WriteAllText(UserSettingsFile, Data);
             KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
         }
+    }
+
+    public enum SettingsType : int
+    {
+        Global = 1,
+        Local = 2,
+        Portable = 3
+    }
+
+    [Serializable]
+    public class Restrictions
+    {
+        /// <summary>
+        /// Minimum (inclusive) RSA key size in bits
+        /// </summary>
+        public int MinimumRsaSize { get; set; }
+
+        /// <summary>
+        /// Disallowed modes for encrypting files
+        /// </summary>
+        public CryptoMode[] BlockedModes { get; set; }
+
+        /// <summary>
+        /// Disallow conversion into portable version
+        /// </summary>
+        public bool BlockPortable { get; set; }
+        /// <summary>
+        /// If set will add these keys to newly encrypted files.
+        /// </summary>
+        public RSAKey[] AutoRsaKeys { get; set; }
     }
 
     [Serializable]

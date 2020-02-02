@@ -16,6 +16,8 @@ namespace CryptoPad
             Settings = CurrentSettings;
 
             InitRSA();
+
+            lblMode.Text = Settings.Type.ToString();
         }
 
         private void InitRSA()
