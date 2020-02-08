@@ -221,25 +221,75 @@ namespace CryptoPad
             return ASGlobal;
         }
 
-        public void SaveSettings()
+        public static AppSettings GlobalSettings()
         {
-            var Data = Tools.ToXML(this);
-            if (File.Exists(PortableSettingsFile))
-            {
-                File.WriteAllText(PortableSettingsFile, Data);
-                KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
-            }
-            var DirName = Path.GetDirectoryName(UserSettingsFile);
             try
             {
-                Directory.CreateDirectory(DirName);
+                var ASGlobal = Tools.FromXML<AppSettings>(File.ReadAllText(GlobalSettingsFile));
+                ASGlobal.KeyStorage = Path.Combine(Path.GetDirectoryName(GlobalSettingsFile), "Keys");
+                ASGlobal.Type = SettingsType.Global;
+                return ASGlobal;
             }
             catch
             {
-                //Don't care
+                return null;
             }
-            File.WriteAllText(UserSettingsFile, Data);
-            KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
+        }
+
+        public AppSettings SaveSettings(SettingsType Mode = 0)
+        {
+            var Data = Tools.ToXML(this);
+            //Auto detect mode
+            if (Mode == 0)
+            {
+                Restrictions = null;
+                if (File.Exists(PortableSettingsFile))
+                {
+                    File.WriteAllText(PortableSettingsFile, Data);
+                    Type = SettingsType.Portable;
+                    KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
+                }
+                else
+                {
+                    //Create settings directory
+                    var DirName = Path.GetDirectoryName(UserSettingsFile);
+                    try
+                    {
+                        Directory.CreateDirectory(DirName);
+                    }
+                    catch
+                    {
+                        //Don't care
+                    }
+                    File.WriteAllText(UserSettingsFile, Data);
+                    Type = SettingsType.Local;
+                    KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
+                }
+            }
+            else
+            {
+                switch (Mode)
+                {
+                    case SettingsType.Local:
+                        Restrictions = null;
+                        KeyStorage= Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
+                        File.WriteAllText(UserSettingsFile, Data);
+                        break;
+                    case SettingsType.Global:
+                        KeyStorage = Path.Combine(Path.GetDirectoryName(GlobalSettingsFile), "Keys");
+                        File.WriteAllText(GlobalSettingsFile, Data);
+                        break;
+                    case SettingsType.Portable:
+                        Restrictions = null;
+                        KeyStorage = Path.Combine(Path.GetDirectoryName(PortableSettingsFile), "Keys");
+                        File.WriteAllText(PortableSettingsFile, Data);
+                        break;
+                    default:
+                        throw new NotImplementedException($"The given {nameof(SettingsType)} value is invalid");
+                }
+                Type = Mode;
+            }
+            return this;
         }
     }
 

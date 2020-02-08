@@ -34,6 +34,8 @@
             this.lblModeDesc = new System.Windows.Forms.Label();
             this.lblMode = new System.Windows.Forms.LinkLabel();
             this.tabRSA = new System.Windows.Forms.TabPage();
+            this.pbGenerator = new System.Windows.Forms.ProgressBar();
+            this.btnNew = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnImport = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
@@ -47,8 +49,6 @@
             this.OFD = new System.Windows.Forms.OpenFileDialog();
             this.SFD = new System.Windows.Forms.SaveFileDialog();
             this.FBD = new System.Windows.Forms.FolderBrowserDialog();
-            this.btnNew = new System.Windows.Forms.Button();
-            this.pbGenerator = new System.Windows.Forms.ProgressBar();
             this.tabs.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.flowPanelMode.SuspendLayout();
@@ -93,19 +93,20 @@
             this.lblModeDesc.AutoSize = true;
             this.lblModeDesc.Location = new System.Drawing.Point(3, 0);
             this.lblModeDesc.Name = "lblModeDesc";
-            this.lblModeDesc.Size = new System.Drawing.Size(71, 13);
+            this.lblModeDesc.Size = new System.Drawing.Size(74, 13);
             this.lblModeDesc.TabIndex = 0;
-            this.lblModeDesc.Text = "Current Mode";
+            this.lblModeDesc.Text = "Current Mode:";
             // 
             // lblMode
             // 
             this.lblMode.AutoSize = true;
-            this.lblMode.Location = new System.Drawing.Point(80, 0);
+            this.lblMode.Location = new System.Drawing.Point(83, 0);
             this.lblMode.Name = "lblMode";
             this.lblMode.Size = new System.Drawing.Size(46, 13);
             this.lblMode.TabIndex = 1;
             this.lblMode.TabStop = true;
             this.lblMode.Text = "<Mode>";
+            this.lblMode.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblMode_LinkClicked);
             // 
             // tabRSA
             // 
@@ -123,6 +124,28 @@
             this.tabRSA.TabIndex = 1;
             this.tabRSA.Text = "RSA Keys";
             this.tabRSA.UseVisualStyleBackColor = true;
+            // 
+            // pbGenerator
+            // 
+            this.pbGenerator.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbGenerator.Location = new System.Drawing.Point(6, 467);
+            this.pbGenerator.Name = "pbGenerator";
+            this.pbGenerator.Size = new System.Drawing.Size(145, 23);
+            this.pbGenerator.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.pbGenerator.TabIndex = 6;
+            this.pbGenerator.Visible = false;
+            // 
+            // btnNew
+            // 
+            this.btnNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnNew.Location = new System.Drawing.Point(157, 467);
+            this.btnNew.Name = "btnNew";
+            this.btnNew.Size = new System.Drawing.Size(75, 23);
+            this.btnNew.TabIndex = 1;
+            this.btnNew.Text = "&New...";
+            this.btnNew.UseVisualStyleBackColor = true;
+            this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
             // 
             // btnDelete
             // 
@@ -234,28 +257,6 @@
             // FBD
             // 
             this.FBD.Description = "Save multiple keys";
-            // 
-            // btnNew
-            // 
-            this.btnNew.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnNew.Location = new System.Drawing.Point(157, 467);
-            this.btnNew.Name = "btnNew";
-            this.btnNew.Size = new System.Drawing.Size(75, 23);
-            this.btnNew.TabIndex = 1;
-            this.btnNew.Text = "&New...";
-            this.btnNew.UseVisualStyleBackColor = true;
-            this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
-            // 
-            // pbGenerator
-            // 
-            this.pbGenerator.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbGenerator.Location = new System.Drawing.Point(6, 467);
-            this.pbGenerator.Name = "pbGenerator";
-            this.pbGenerator.Size = new System.Drawing.Size(145, 23);
-            this.pbGenerator.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.pbGenerator.TabIndex = 6;
-            this.pbGenerator.Visible = false;
             // 
             // frmSettings
             // 

@@ -245,5 +245,54 @@ namespace CryptoPad
                 Program.AlertMsg("Please wait for the key generator to finish. This usually takes only a few seconds");
             }
         }
+
+        private void lblMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var Keys = Settings.LoadRSAKeys();
+            var Global = AppSettings.GlobalSettings();
+            if (Settings.Type == SettingsType.Local || Settings.Type == SettingsType.Global)
+            {
+                if (Global == null || Global.Restrictions == null || !Global.Restrictions.BlockPortable)
+                {
+                    var KeyStore = Settings.KeyStorage;
+                    var isLocal = Settings.Type == SettingsType.Local;
+                    Settings.SaveSettings(SettingsType.Portable);
+                    Settings.SaveRSAKeys(Keys);
+                    if (isLocal && Program.AlertMsg("Portable mode enabled. Delete old settings and keys from user profile?", true) == DialogResult.Yes)
+                    {
+                        System.IO.File.Delete(AppSettings.UserSettingsFile);
+                        System.IO.Directory.Delete(KeyStore, true);
+                    }
+                }
+                else
+                {
+                    Program.ErrorMsg("The administrator disabled switching to portable mode");
+                }
+            }
+            else if (Settings.Type == SettingsType.Portable)
+            {
+                if (Program.AlertMsg("Really change into regular mode? This will copy all RSA keys to the local user profile (keeps existing keys) and delete the portable settings and keys.", true) == DialogResult.Yes)
+                {
+                    var KeyStore = Settings.KeyStorage;
+                    Settings = Settings.SaveSettings(SettingsType.Local);
+                    Settings.SaveRSAKeys(Keys);
+                    try
+                    {
+                        System.IO.File.Delete(AppSettings.PortableSettingsFile);
+                        System.IO.Directory.Delete(KeyStore, true);
+                    }
+                    catch
+                    {
+                        Program.ErrorMsg("Unable to delete the key store");
+                    }
+                }
+            }
+            else
+            {
+                throw new NotImplementedException($"Invalid {nameof(SettingsType)} value");
+            }
+            lblMode.Text = Settings.Type.ToString();
+            InitRSA();
+        }
     }
 }
