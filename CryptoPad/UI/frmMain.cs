@@ -142,6 +142,10 @@ namespace CryptoPad
                             {
                                 Params[CryptoMode.Keyfile] = dlgCrypt.Keyfile;
                             }
+                            if(dlgCrypt.Modes.HasFlag(CryptoMode.RSA))
+                            {
+                                Params[CryptoMode.RSA] = dlgCrypt.RsaKey.Key;
+                            }
 
                             try
                             {
