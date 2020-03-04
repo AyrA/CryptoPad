@@ -254,14 +254,17 @@ namespace CryptoPad
             {
                 if (Global == null || Global.Restrictions == null || !Global.Restrictions.BlockPortable)
                 {
-                    var KeyStore = Settings.KeyStorage;
-                    var isLocal = Settings.Type == SettingsType.Local;
-                    Settings.SaveSettings(SettingsType.Portable);
-                    Settings.SaveRSAKeys(Keys);
-                    if (isLocal && Program.AlertMsg("Portable mode enabled. Delete old settings and keys from user profile?", true) == DialogResult.Yes)
+                    if (Program.AlertMsg("Turn on portable mode? This allows you to take your settings and keys with you on a flash drive, but it's easier to accidentally delete your keys.", true) == DialogResult.Yes)
                     {
-                        System.IO.File.Delete(AppSettings.UserSettingsFile);
-                        System.IO.Directory.Delete(KeyStore, true);
+                        var KeyStore = Settings.KeyStorage;
+                        var isLocal = Settings.Type == SettingsType.Local;
+                        Settings.SaveSettings(SettingsType.Portable);
+                        Settings.SaveRSAKeys(Keys);
+                        if (isLocal && Program.AlertMsg("Portable mode enabled. Delete old settings and keys from user profile?", true) == DialogResult.Yes)
+                        {
+                            System.IO.File.Delete(AppSettings.UserSettingsFile);
+                            System.IO.Directory.Delete(KeyStore, true);
+                        }
                     }
                 }
                 else
