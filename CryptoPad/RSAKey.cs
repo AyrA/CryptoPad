@@ -5,15 +5,34 @@ using System.Xml.Serialization;
 
 namespace CryptoPad
 {
+    /// <summary>
+    /// Represents a serializable RSA key
+    /// </summary>
     [Serializable]
     public class RSAKey
     {
+        /// <summary>
+        /// Base hash code of this inscance.
+        /// </summary>
+        /// <remarks>
+        /// Can be any value but it's recommended to not be zero or close to it.
+        /// If set to zero, an empty instance will compare equal to (int)0
+        /// </remarks>
         private const int BASE_HASHCODE = 0x6EDC1C5E;
 
+        /// <summary>
+        /// Key name
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// RSA key
+        /// </summary>
         public RSAParameters Key { get; set; }
 
+        /// <summary>
+        /// RSA key size
+        /// </summary>
         [XmlIgnore]
         public int Size
         {
@@ -23,43 +42,84 @@ namespace CryptoPad
             }
         }
 
+        /// <summary>
+        /// Creates an empty instance
+        /// </summary>
         public RSAKey()
         {
             //Empty key
         }
 
+        /// <summary>
+        /// Creates a named instance
+        /// </summary>
+        /// <param name="Name">Key name</param>
         public RSAKey(string Name)
         {
             this.Name = Name;
         }
 
+        /// <summary>
+        /// Creates an instance with an RSA key
+        /// </summary>
+        /// <param name="Params">RSA key</param>
         public RSAKey(RSAParameters Params)
         {
             Key = Params;
         }
 
+        /// <summary>
+        /// Creates an instance with name and key
+        /// </summary>
+        /// <param name="Name">Key name</param>
+        /// <param name="Params">RSA key</param>
         public RSAKey(string Name, RSAParameters Params)
         {
             this.Name = Name;
             Key = Params;
         }
 
+        /// <summary>
+        /// Checks if two given public keys are identical
+        /// </summary>
+        /// <param name="K">Key to compare with</param>
+        /// <returns>true, if identical public keys</returns>
         public bool IsSamePublicKey(RSAKey K)
         {
             return IsSamePublicKey(K.Key);
         }
 
+        /// <summary>
+        /// Checks if two given public keys are identical
+        /// </summary>
+        /// <param name="K">Key to compare with</param>
+        /// <returns>true, if identical public keys</returns>
         public bool IsSamePublicKey(RSAParameters K)
         {
             return Key.Modulus.SequenceEqual(K.Modulus)
                 && Key.Exponent.SequenceEqual(K.Exponent);
         }
 
+        /// <summary>
+        /// Checks if the instance has a valid key
+        /// </summary>
+        /// <returns>true, if key is valid</returns>
         public bool IsValid()
         {
-            return RSAEncryption.HasPrivateKey(Key) || RSAEncryption.HasPublicKey(Key);
+            //We currently don't allow keys that only have the private key parts set.
+            //This means a key must either have the public part only, or both parts.
+            //"x || (x && y)" can be simplified as just "x" due to the 4 possibilities collapsing:
+            //true || (true && false)   --> true
+            //true || (true && true)    --> true
+            //false || (false && false) --> false
+            //false || (false && true)  --> false
+            return RSAEncryption.HasPublicKey(Key);
         }
 
+        /// <summary>
+        /// Calculates the hash code of the given instance
+        /// </summary>
+        /// <returns>Hash code</returns>
         public override int GetHashCode()
         {
             //Hash code of the name
@@ -90,6 +150,11 @@ namespace CryptoPad
             return CodeSum;
         }
 
+        /// <summary>
+        /// Checks if two given instances are identical
+        /// </summary>
+        /// <param name="obj">object to compare to</param>
+        /// <returns>true, if identical</returns>
         public override bool Equals(object obj)
         {
             if (obj == null)

@@ -3,146 +3,52 @@ using System.Security.Cryptography;
 
 namespace CryptoPad
 {
+    /// <summary>
+    /// Provides cryptographic oprtations for RSA
+    /// </summary>
     public static class RSAEncryption
     {
+        /// <summary>
+        /// Default key size for new keys
+        /// </summary>
         public const int DEFAULT_KEYSIZE = 4096;
 
+        /// <summary>
+        /// Checks if no item in the given argument list of byte arrays contains null values or empty arrays
+        /// </summary>
+        /// <param name="Data">Any number of byte arrays</param>
+        /// <returns>true, if no argument is null or empty</returns>
         private static bool NotEmpty(params byte[][] Data)
         {
             return Data != null && !Data.Any(m => m == null || m.Length == 0);
         }
 
-        /*
-        
-        private static int GetIntegerSize(BinaryReader BR)
-        {
-            int count = 0;
-            if (BR.ReadByte() != 0x02)
-            {
-                throw new FormatException("Expected integer field");
-            }
-            byte b = BR.ReadByte();
-            switch (b)
-            {
-                case 0x81:
-                    count = BR.ReadByte();
-                    break;
-                case 0x82:
-                    count = BR.ReadByte() << 8;
-                    count += BR.ReadByte();
-                    break;
-                default:
-                    count = b;
-                    break;
-            }
-            while (BR.ReadByte() == 0x00)
-            {
-                //remove high order zeros in data
-                count -= 1;
-            }
-            //last ReadByte wasn't a removed zero, so back up a byte
-            BR.BaseStream.Seek(-1, SeekOrigin.Current);
-            return count;
-        }
-
-        public static RSAParameters ImportPEMKey(string Key)
-        {
-            Key = Key.Trim();
-            if (Key.StartsWith("-----"))
-            {
-                Key = Key.Substring(Key.IndexOf('\n') + 1);
-            }
-            if(Key.EndsWith("-----"))
-            {
-                Key = Key.Substring(0, Key.LastIndexOf('\n')).Trim();
-            }
-            return ImportPEMKey(Convert.FromBase64String(Key));
-        }
-
-        public static RSAParameters ImportPEMKey(byte[] Key)
-        {
-            RSAParameters Params = new RSAParameters();
-
-            using (MemoryStream MS = new MemoryStream(Key))
-            {
-                using (BinaryReader BR = new BinaryReader(MS))
-                {
-                    //wrap Memory Stream with BinaryReader for easy reading
-                    int elems = 0;
-                    try
-                    {
-                        //data read as little endian order (actual data order for Sequence is 30 81)
-                        switch (BR.ReadUInt16())
-                        {
-                            case 0x8130:
-                                BR.ReadByte();
-                                break;
-                            case 0x8230:
-                                BR.ReadInt16();
-                                break;
-                            default:
-                                throw new FormatException("Key is in an invalid format");
-                        }
-
-                        //version number
-                        if (BR.ReadUInt16() != 0x0102)
-                        {
-                            throw new FormatException("Invalid version number");
-                        }
-                        //Null byte must follow the version number
-                        if (BR.ReadByte() != 0x00)
-                        {
-                            throw new FormatException("Invalid key format");
-                        }
-
-
-                        //------  all private key components are Integer sequences ----
-                        elems = GetIntegerSize(BR);
-                        Params.Modulus = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.Exponent = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.D = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.P = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.Q = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.DP = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.DQ = BR.ReadBytes(elems);
-
-                        elems = GetIntegerSize(BR);
-                        Params.InverseQ = BR.ReadBytes(elems);
-
-                        return Params;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new FormatException("Unable to decode the key. See inner exception for details", ex);
-                    }
-                }
-            }
-        }
-
-        //*/
-
+        /// <summary>
+        /// Checks if the supplied RSA object has private key parts (can sign and decrypt)
+        /// </summary>
+        /// <param name="Param">RSA parameters</param>
+        /// <returns>true, if private key present</returns>
         public static bool HasPrivateKey(RSAParameters Param)
         {
             return NotEmpty(Param.D, Param.DP, Param.DQ, Param.InverseQ, Param.P, Param.Q);
         }
 
+        /// <summary>
+        /// Checks if the supplied RSA object has public key parts (can verify and encrypt)
+        /// </summary>
+        /// <param name="Param">RSA parameters</param>
+        /// <returns>true, if public key present</returns>
         public static bool HasPublicKey(RSAParameters Param)
         {
             return NotEmpty(Param.Exponent, Param.Modulus);
         }
 
+        /// <summary>
+        /// Compares two RSA keys
+        /// </summary>
+        /// <param name="Key1">RSA key</param>
+        /// <param name="Key2">RSA key</param>
+        /// <returns>true, if considered identical</returns>
         public static bool Compare(RSAParameters Key1, RSAParameters Key2)
         {
             //Check if public keys are available
@@ -157,6 +63,7 @@ namespace CryptoPad
                         !Key1.Exponent.SequenceEqual(Key2.Exponent) ||
                         !Key1.Modulus.SequenceEqual(Key2.Modulus))
                     {
+                        //Values differ
                         return false;
                     }
                 }
@@ -186,6 +93,7 @@ namespace CryptoPad
                         !Key1.P.SequenceEqual(Key2.P) ||
                         !Key1.Q.SequenceEqual(Key2.Q))
                     {
+                        //Values differ
                         return false;
                     }
                 }
@@ -195,10 +103,16 @@ namespace CryptoPad
                     return false;
                 }
             }
-            //Keys are identical
+            //Keys are identical (both empty or same values)
             return true;
         }
 
+        /// <summary>
+        /// Generates a new RSA key
+        /// </summary>
+        /// <param name="Name">Key name</param>
+        /// <param name="Size">Key size, defaults to <see cref="DEFAULT_KEYSIZE"/></param>
+        /// <returns></returns>
         public static RSAKey GenerateKey(string Name, int Size = DEFAULT_KEYSIZE)
         {
             using (var Alg = new RSACryptoServiceProvider(Size))
@@ -208,6 +122,12 @@ namespace CryptoPad
             }
         }
 
+        /// <summary>
+        /// Strips the private key information from a given key for exportingor publishing
+        /// </summary>
+        /// <param name="Key">Key to strip information of</param>
+        /// <returns>New copy with public key parts only</returns>
+        /// <remarks>The supplied key itself is not modified</remarks>
         public static RSAKey StripPrivate(RSAKey Key)
         {
             return new RSAKey(Key.Name, new RSAParameters()
@@ -217,11 +137,23 @@ namespace CryptoPad
             });
         }
 
+        /// <summary>
+        /// Encrypts the given data using the given key
+        /// </summary>
+        /// <param name="Key">RSA key with public key parts</param>
+        /// <param name="Data">Data to encrypt</param>
+        /// <returns>Encrypted data</returns>
         public static byte[] Encrypt(RSAKey Key, byte[] Data)
         {
             return Encrypt(Key.Key, Data);
         }
 
+        /// <summary>
+        /// Encrypts the given data using the given key
+        /// </summary>
+        /// <param name="Key">RSA key with public key parts</param>
+        /// <param name="Data">Data to encrypt</param>
+        /// <returns>Encrypted data</returns>
         public static byte[] Encrypt(RSAParameters Key, byte[] Data)
         {
             using (var Alg = RSA.Create())
@@ -231,11 +163,23 @@ namespace CryptoPad
             }
         }
 
+        /// <summary>
+        /// Decrypts the given data using the given key
+        /// </summary>
+        /// <param name="Key">RSA key with private key parts</param>
+        /// <param name="Data">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
         public static byte[] Decrypt(RSAKey Key, byte[] Data)
         {
             return Decrypt(Key.Key, Data);
         }
 
+        /// <summary>
+        /// Decrypts the given data using the given key
+        /// </summary>
+        /// <param name="Key">RSA key with private key parts</param>
+        /// <param name="Data">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
         public static byte[] Decrypt(RSAParameters Key, byte[] Data)
         {
             using (var Alg = RSA.Create())
@@ -245,11 +189,23 @@ namespace CryptoPad
             }
         }
 
+        /// <summary>
+        /// Signs data
+        /// </summary>
+        /// <param name="Key">RSA key with private key parts</param>
+        /// <param name="Data">Data to sign</param>
+        /// <returns>Signature</returns>
         public static byte[] Sign(RSAKey Key, byte[] Data)
         {
             return Sign(Key.Key, Data);
         }
 
+        /// <summary>
+        /// Signs data
+        /// </summary>
+        /// <param name="Key">RSA key with private key parts</param>
+        /// <param name="Data">Data to sign</param>
+        /// <returns>Signature</returns>
         public static byte[] Sign(RSAParameters Key, byte[] Data)
         {
             using (var Alg = RSA.Create())
@@ -259,11 +215,25 @@ namespace CryptoPad
             }
         }
 
+        /// <summary>
+        /// Verifies a signature
+        /// </summary>
+        /// <param name="Key">RSA key with public key parts</param>
+        /// <param name="Data">Data to check the signature of</param>
+        /// <param name="Signature">Expected signature</param>
+        /// <returns>true, if signature matches</returns>
         public static bool Verify(RSAKey Key, byte[] Data, byte[] Signature)
         {
             return Verify(Key.Key, Data, Signature);
         }
 
+        /// <summary>
+        /// Verifies a signature
+        /// </summary>
+        /// <param name="Key">RSA key with public key parts</param>
+        /// <param name="Data">Data to check the signature of</param>
+        /// <param name="Signature">Expected signature</param>
+        /// <returns>true, if signature matches</returns>
         public static bool Verify(RSAParameters Key, byte[] Data, byte[] Signature)
         {
             using (var Alg = RSA.Create())

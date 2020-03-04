@@ -6,6 +6,9 @@ using System.Xml.Serialization;
 
 namespace CryptoPad
 {
+    /// <summary>
+    /// Utility functions
+    /// </summary>
     public static class Tools
     {
         /// <summary>
