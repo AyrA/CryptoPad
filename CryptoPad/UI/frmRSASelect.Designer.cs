@@ -120,6 +120,7 @@
             this.Name = "frmRSASelect";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "RSA Key Selection";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmRSASelect_FormClosing);
             this.ResumeLayout(false);
