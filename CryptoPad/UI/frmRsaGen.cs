@@ -26,7 +26,17 @@ namespace CryptoPad
         public frmRsaGen()
         {
             InitializeComponent();
-            cbSize.Items.AddRange(KeySizes.Cast<object>().ToArray());
+            var config = AppSettings.GlobalSettings();
+            if (config != null && config.Restrictions != null)
+            {
+                //Add only values at or above the minimum value
+                cbSize.Items.AddRange(KeySizes.Where(m => m.Size >= config.Restrictions.MinimumRsaSize).Cast<object>().ToArray());
+            }
+            else
+            {
+                //Add all keys
+                cbSize.Items.AddRange(KeySizes.Cast<object>().ToArray());
+            }
             cbSize.SelectedIndex = 0;
         }
 
