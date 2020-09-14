@@ -224,6 +224,24 @@ namespace CryptoPad
         }
 
         /// <summary>
+        /// Gets the keys defined by the administrator
+        /// </summary>
+        /// <returns>Administrative Keys</returns>
+        public static RSAKey[] GetAdministrativeKeys()
+        {
+            //Ignore administrative keys if we're running on portable settings.
+            if (GetSettings().Type != SettingsType.Portable)
+            {
+                var GS = GlobalSettings();
+                if (GS != null)
+                {
+                    return GS.LoadRSAKeys();
+                }
+            }
+            return new RSAKey[0];
+        }
+
+        /// <summary>
         /// Loads settings from Disk
         /// </summary>
         /// <returns></returns>
@@ -245,7 +263,7 @@ namespace CryptoPad
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Unable to deserialize portable file: {ex.Message}");
+                Debug.WriteLine($"Unable to deserialize portable file at {PortableSettingsFile}: {ex.Message}");
             }
 
             //Read global and local settings
@@ -257,7 +275,7 @@ namespace CryptoPad
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Unable to deserialize global settings file: {ex.Message}");
+                Debug.WriteLine($"Unable to deserialize global settings file at {GlobalSettingsFile}: {ex.Message}");
             }
             try
             {
@@ -269,7 +287,7 @@ namespace CryptoPad
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Unable to deserialize user settings file: {ex.Message}");
+                Debug.WriteLine($"Unable to deserialize user settings file at {UserSettingsFile}: {ex.Message}");
             }
             //Return local settings if present
             if (ASGlobal == null)

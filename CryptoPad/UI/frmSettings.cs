@@ -12,12 +12,31 @@ namespace CryptoPad
 
         public frmSettings(AppSettings CurrentSettings)
         {
+            bool RSA = true;
             InitializeComponent();
             Settings = CurrentSettings;
 
-            InitRSA();
-
             lblMode.Text = Settings.Type.ToString();
+            if (Settings.Type != SettingsType.Portable)
+            {
+                var GS = AppSettings.GlobalSettings();
+                if (GS != null)
+                {
+                    lblMode.Enabled = !GS.Restrictions.BlockPortable;
+                    if (GS.Restrictions.BlockedModes.Contains(CryptoMode.RSA))
+                    {
+                        RSA = false;
+                        foreach (var ctrl in tabRSA.Controls.OfType<Control>())
+                        {
+                            ctrl.Enabled = false;
+                        }
+                    }
+                }
+            }
+            if (RSA)
+            {
+                InitRSA();
+            }
         }
 
         private void InitRSA()
@@ -27,6 +46,15 @@ namespace CryptoPad
             {
                 var Item = lvRSA.Items.Add(Key.Name);
                 Item.Tag = Key;
+                Item.SubItems.Add(Key.Size.ToString());
+                Item.SubItems.Add(RSAEncryption.HasPublicKey(Key.Key) ? "Yes" : "No");
+                Item.SubItems.Add(RSAEncryption.HasPrivateKey(Key.Key) ? "Yes" : "No");
+            }
+            foreach (var Key in AppSettings.GetAdministrativeKeys())
+            {
+                var Item = lvRSA.Items.Add(Key.Name);
+                Item.Tag = null;
+                Item.BackColor = System.Drawing.Color.FromArgb(0xFF, 0x00, 0x00);
                 Item.SubItems.Add(Key.Size.ToString());
                 Item.SubItems.Add(RSAEncryption.HasPublicKey(Key.Key) ? "Yes" : "No");
                 Item.SubItems.Add(RSAEncryption.HasPrivateKey(Key.Key) ? "Yes" : "No");
@@ -42,8 +70,14 @@ namespace CryptoPad
             {
                 var Keys = lvRSA.SelectedItems
                     .OfType<ListViewItem>()
+                    .Where(m => m.Tag != null)
                     .Select(m => (RSAKey)m.Tag)
                     .ToArray();
+                if (Keys.Length == 0)
+                {
+                    Program.AlertMsg("You can't export administratively added keys");
+                    return;
+                }
                 if (!Keys.Any(m => RSAEncryption.HasPrivateKey(m.Key)) || Program.AlertMsg(ExportAlert, true) == DialogResult.Yes)
                 {
                     if (lvRSA.SelectedItems.Count == 1)
@@ -90,14 +124,16 @@ namespace CryptoPad
         {
             const string ExportAlert =
                 "You're about to export only the public RSA key parts.\r\n" +
-                "This key will allow encryption only and is meant for sharing with other people and not creating backups.\r\nContinue?";
+                "This key will allow encryption only and is meant for sharing with other people and not creating backups.\r\n" +
+                "Continue?";
             if (lvRSA.SelectedItems.Count > 0)
             {
                 var Keys = lvRSA.SelectedItems
                     .OfType<ListViewItem>()
+                    .Where(m => m.Tag != null)
                     .Select(m => RSAEncryption.StripPrivate((RSAKey)m.Tag))
                     .ToArray();
-                if (Program.AlertMsg(ExportAlert, true) == DialogResult.Yes)
+                if (Keys.Length > 0 && Program.AlertMsg(ExportAlert, true) == DialogResult.Yes)
                 {
                     if (lvRSA.SelectedItems.Count == 1)
                     {
@@ -132,6 +168,10 @@ namespace CryptoPad
                         }
                     }
                 }
+                else if (Keys.Length == 0)
+                {
+                    Program.AlertMsg("You can't export administratively added keys");
+                }
             }
             else
             {
@@ -144,6 +184,7 @@ namespace CryptoPad
             if (OFD.ShowDialog() == DialogResult.OK)
             {
                 var Keys = Settings.LoadRSAKeys();
+                var AdminKeys = AppSettings.GetAdministrativeKeys();
                 var NewKeys = new List<RSAKey>();
                 foreach (var Name in OFD.FileNames)
                 {
@@ -155,7 +196,7 @@ namespace CryptoPad
                             throw new Exception("The loaded RSA key is not valid");
                         }
                         //Check if the key exists as-is
-                        if (!Keys.Any(m => m.Equals(Key)))
+                        if (!Keys.Concat(AdminKeys).Any(m => m.Equals(Key)))
                         {
                             //Check if the key has a private key
                             if (RSAEncryption.HasPrivateKey(Key.Key))
@@ -198,10 +239,16 @@ namespace CryptoPad
                         .OfType<ListViewItem>()
                         .Select(m => (RSAKey)m.Tag)
                         .ToArray();
+                    var adminCount = SelectedKeys.Count(m => m == null);
+                    var removed = false;
                     var AllKeys = Settings.LoadRSAKeys().ToList();
                     foreach (var K in SelectedKeys)
                     {
-                        AllKeys.Remove(K);
+                        removed |= AllKeys.Remove(K);
+                    }
+                    if (!removed)
+                    {
+                        Program.AlertMsg("No keys were removed. Note that you can't delete administratively added keys");
                     }
                     Settings.SaveRSAKeys(AllKeys, true);
                     InitRSA();
