@@ -81,6 +81,7 @@
             this.cbKeyfile.Text = "Keyfile";
             this.ttMain.SetToolTip(this.cbKeyfile, resources.GetString("cbKeyfile.ToolTip"));
             this.cbKeyfile.UseVisualStyleBackColor = true;
+            this.cbKeyfile.CheckedChanged += new System.EventHandler(this.cbKeyfile_CheckedChanged);
             // 
             // cbPassword
             // 
@@ -92,11 +93,13 @@
             this.cbPassword.Text = "Password";
             this.ttMain.SetToolTip(this.cbPassword, "Allows decryption using an ordinary password.");
             this.cbPassword.UseVisualStyleBackColor = true;
+            this.cbPassword.CheckedChanged += new System.EventHandler(this.cbPassword_CheckedChanged);
             // 
             // btnBrowse
             // 
             this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnBrowse.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnBrowse.Enabled = false;
             this.btnBrowse.Location = new System.Drawing.Point(478, 113);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(75, 23);
@@ -109,6 +112,7 @@
             // 
             this.tbKeyfile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbKeyfile.Enabled = false;
             this.tbKeyfile.Location = new System.Drawing.Point(122, 115);
             this.tbKeyfile.Name = "tbKeyfile";
             this.tbKeyfile.Size = new System.Drawing.Size(350, 20);
@@ -119,6 +123,7 @@
             // 
             this.tbPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPassword.Enabled = false;
             this.tbPassword.Location = new System.Drawing.Point(122, 145);
             this.tbPassword.Name = "tbPassword";
             this.tbPassword.Size = new System.Drawing.Size(350, 20);
@@ -180,10 +185,12 @@
             this.ttMain.SetToolTip(this.cbRSA, "Encrypts using the RSA algorithm\r\nMost useful to encrypt a file for someone else\r" +
         "\n");
             this.cbRSA.UseVisualStyleBackColor = true;
+            this.cbRSA.CheckedChanged += new System.EventHandler(this.cbRSA_CheckedChanged);
             // 
             // lblRsaName
             // 
             this.lblRsaName.AutoSize = true;
+            this.lblRsaName.Enabled = false;
             this.lblRsaName.Location = new System.Drawing.Point(119, 173);
             this.lblRsaName.Name = "lblRsaName";
             this.lblRsaName.Size = new System.Drawing.Size(96, 13);
@@ -192,6 +199,7 @@
             // 
             // btnRsaSelect
             // 
+            this.btnRsaSelect.Enabled = false;
             this.btnRsaSelect.Location = new System.Drawing.Point(478, 173);
             this.btnRsaSelect.Name = "btnRsaSelect";
             this.btnRsaSelect.Size = new System.Drawing.Size(75, 23);

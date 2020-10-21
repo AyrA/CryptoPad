@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
 
@@ -86,7 +87,7 @@ namespace CryptoPad
             }
             if (CurrentFile != null)
             {
-                encStatus = string.Join(", ", CurrentFile.Providers.Select(m => m.Mode));
+                encStatus = string.Join(", ", CurrentFile.Providers.Select(m => m.Mode).Distinct());
             }
             Text = $"CryptoPad: [{name}]";
             tsStatusLabel.Text = name;
@@ -124,11 +125,19 @@ namespace CryptoPad
             {
                 if (CurrentFile == null)
                 {
-                    using (var dlgCrypt = new frmCryptoModeSelect(Settings))
+                    var GS = AppSettings.GlobalSettings();
+                    if (GS == null)
+                    {
+                        GS = new AppSettings()
+                        {
+                            Restrictions = new Restrictions()
+                        };
+                    }
+                    using (var dlgCrypt = new frmCryptoModeSelect(Settings, GS.Restrictions.AllowedModes))
                     {
                         if (dlgCrypt.ShowDialog() == DialogResult.OK)
                         {
-                            if (dlgCrypt.Modes == 0)
+                            if (dlgCrypt.Modes == 0 && GS.Restrictions.AutoRsaKeys.Length == 0)
                             {
                                 Program.ErrorMsg("Please select at least one mode of encryption");
                                 return false;
@@ -142,9 +151,14 @@ namespace CryptoPad
                             {
                                 Params[CryptoMode.Keyfile] = dlgCrypt.Keyfile;
                             }
-                            if(dlgCrypt.Modes.HasFlag(CryptoMode.RSA))
+                            if (dlgCrypt.Modes.HasFlag(CryptoMode.RSA) || GS.Restrictions.AutoRsaKeys.Length > 0)
                             {
-                                Params[CryptoMode.RSA] = dlgCrypt.RsaKey.Key;
+                                var RsaList = new List<RSAParameters>(GS.Restrictions.AutoRsaKeys.Select(m => m.Key));
+                                if (dlgCrypt.Modes.HasFlag(CryptoMode.RSA))
+                                {
+                                    RsaList.Add(dlgCrypt.RsaKey.Key);
+                                }
+                                Params[CryptoMode.RSA] = RsaList;
                             }
 
                             try
@@ -423,7 +437,15 @@ namespace CryptoPad
             }
             else
             {
-                using (var dlgModes = new frmCryptoModeSelect(Settings, PreselectedModes: CurrentFile.AllModes))
+                var GS = AppSettings.GlobalSettings();
+                if (GS == null)
+                {
+                    GS = new AppSettings()
+                    {
+                        Restrictions = new Restrictions()
+                    };
+                }
+                using (var dlgModes = new frmCryptoModeSelect(Settings, GS.Restrictions.AllowedModes, CurrentFile.AllModes))
                 {
                     if (dlgModes.ShowDialog() == DialogResult.OK)
                     {

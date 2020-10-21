@@ -34,9 +34,9 @@ namespace CryptoPad
             //Set enabled controls
             cbUserAccount.Enabled = AllowedModes.HasFlag(CryptoMode.CryptUser);
             cbComputerAccount.Enabled = AllowedModes.HasFlag(CryptoMode.CryptMachine);
-            btnBrowse.Enabled = tbKeyfile.Enabled = cbKeyfile.Enabled = AllowedModes.HasFlag(CryptoMode.Keyfile);
-            tbPassword.Enabled = cbPassword.Enabled = AllowedModes.HasFlag(CryptoMode.Password);
-            lblRsaName.Enabled = cbRSA.Enabled = btnRsaSelect.Enabled = AllowedModes.HasFlag(CryptoMode.RSA);
+            cbKeyfile.Enabled = AllowedModes.HasFlag(CryptoMode.Keyfile);
+            cbPassword.Enabled = AllowedModes.HasFlag(CryptoMode.Password);
+            cbRSA.Enabled = AllowedModes.HasFlag(CryptoMode.RSA);
 
             //Set checked controls
             cbUserAccount.Checked = cbUserAccount.Enabled && PreselectedModes.HasFlag(CryptoMode.CryptUser);
@@ -57,12 +57,12 @@ namespace CryptoPad
 
         private void tbKeyfile_TextChanged(object sender, EventArgs e)
         {
-            cbKeyfile.Checked = !string.IsNullOrEmpty(tbKeyfile.Text);
+            //cbKeyfile.Checked = !string.IsNullOrEmpty(tbKeyfile.Text);
         }
 
         private void tbPassword_TextChanged(object sender, EventArgs e)
         {
-            cbPassword.Checked = !string.IsNullOrEmpty(tbPassword.Text);
+            //cbPassword.Checked = !string.IsNullOrEmpty(tbPassword.Text);
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -123,6 +123,21 @@ namespace CryptoPad
                 }
                 Settings.SaveRSAKeys(F.AllKeys, true);
             }
+        }
+
+        private void cbKeyfile_CheckedChanged(object sender, EventArgs e)
+        {
+            tbKeyfile.Enabled = btnBrowse.Enabled = cbKeyfile.Checked;
+        }
+
+        private void cbPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            tbPassword.Enabled = cbPassword.Checked;
+        }
+
+        private void cbRSA_CheckedChanged(object sender, EventArgs e)
+        {
+            lblRsaName.Enabled = btnRsaSelect.Enabled = cbRSA.Checked;
         }
     }
 }

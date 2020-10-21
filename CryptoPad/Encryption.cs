@@ -310,50 +310,79 @@ namespace CryptoPad
 
             var KeyBlob = Encoding.ASCII.GetBytes(Convert.ToBase64String(AesKey) + ":" + Convert.ToBase64String(MacKey));
 
-            var EncModes = Tools.FlagsToArray(Modes);
+            //var EncModes = Tools.FlagsToArray(Modes);
             ED.Data = EncryptWithKey(Content, AesKey, MacKey);
-            ED.Providers = EncModes.Select(m => new KeyProvider() { Mode = m }).ToArray();
-            for (var i = 0; i < ED.Providers.Length; i++)
+
+            var Providers = new List<KeyProvider>();
+            foreach (var ModeParam in ModeParams.Where(m => Modes.HasFlag(m.Key)))
             {
-                var P = ED.Providers[i];
-                var Data = new AesCryptoData();
-                var Param = ModeParams == null ? null : (ModeParams.ContainsKey(P.Mode) ? ModeParams[P.Mode] : null);
-                switch (P.Mode)
+                switch (ModeParam.Key)
                 {
                     case CryptoMode.CryptUser:
-                        Data.Salt = Data.IV = null;
-                        Data.Data = ProtectData(false, KeyBlob);
+                        Providers.Add(new KeyProvider()
+                        {
+                            Mode = ModeParam.Key,
+                            KeyData = new AesCryptoData()
+                            {
+                                Salt = null,
+                                IV = null,
+                                Data = ProtectData(false, KeyBlob)
+                            }
+                        });
                         break;
                     case CryptoMode.CryptMachine:
-                        Data.Salt = Data.IV = null;
-                        Data.Data = ProtectData(true, KeyBlob);
+                        Providers.Add(new KeyProvider()
+                        {
+                            Mode = ModeParam.Key,
+                            KeyData = new AesCryptoData()
+                            {
+                                Salt = null,
+                                IV = null,
+                                Data = ProtectData(true, KeyBlob)
+                            }
+                        });
                         break;
                     case CryptoMode.RSA:
-                        if (Param == null || Param.GetType() != typeof(RSAParameters))
+                        if (ModeParam.Value == null || !(ModeParam.Value is IEnumerable<RSAParameters>))
                         {
                             throw new ArgumentException("RSA mode requires an RSAParameters structure as argument");
                         }
-                        Data = EncryptWithRSAKey(KeyBlob, (RSAParameters)Param);
+                        foreach (var key in (IEnumerable<RSAParameters>)ModeParam.Value)
+                        {
+                            Providers.Add(new KeyProvider()
+                            {
+                                Mode = ModeParam.Key,
+                                KeyData = EncryptWithRSAKey(KeyBlob, key)
+                            });
+                        }
                         break;
                     case CryptoMode.Keyfile:
-                        if (Param == null || Param.GetType() != typeof(string))
+                        if (ModeParam.Value == null || ModeParam.Value.GetType() != typeof(string))
                         {
                             throw new ArgumentException("Keyfile mode requires a file name argument");
                         }
-                        Data = EncryptWithKeyfile(KeyBlob, Param.ToString());
+                        Providers.Add(new KeyProvider()
+                        {
+                            Mode = ModeParam.Key,
+                            KeyData = EncryptWithKeyfile(KeyBlob, ModeParam.Value.ToString())
+                        });
                         break;
                     case CryptoMode.Password:
-                        if (Param == null || Param.GetType() != typeof(string))
+                        if (ModeParam.Value == null || ModeParam.Value.GetType() != typeof(string))
                         {
                             throw new ArgumentException("Password mode requires a password argument");
                         }
-                        Data = EncryptWithPassword(KeyBlob, Param.ToString());
+                        Providers.Add(new KeyProvider()
+                        {
+                            Mode = ModeParam.Key,
+                            KeyData = EncryptWithPassword(KeyBlob, ModeParam.Value.ToString())
+                        });
                         break;
                     default:
-                        throw new NotImplementedException($"Algorithm {P.Mode} is not implemented");
+                        throw new NotImplementedException($"Algorithm {ModeParam.Key} is not implemented");
                 }
-                P.KeyData = Data;
             }
+            ED.Providers = Providers.ToArray();
             return ED;
         }
 

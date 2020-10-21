@@ -282,17 +282,17 @@ namespace CryptoPad
                 ASLocal = Tools.FromXML<AppSettings>(File.ReadAllText(UserSettingsFile));
                 ASLocal.KeyStorage = Path.Combine(Path.GetDirectoryName(UserSettingsFile), "Keys");
                 ASLocal.Type = SettingsType.Local;
-                //Ignore restrictions in local file
-                ASLocal.Restrictions = null;
+                //Ignore restrictions in local file and replace with global file
+                ASLocal.Restrictions = ASGlobal?.Restrictions;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Unable to deserialize user settings file at {UserSettingsFile}: {ex.Message}");
             }
             //Return local settings if present
-            if (ASGlobal == null)
+            if (ASLocal == null)
             {
-                if (ASLocal == null)
+                if (ASGlobal == null)
                 {
                     Debug.WriteLine($"No settings present. Probably first run");
                     //Invent new local settings
@@ -302,11 +302,14 @@ namespace CryptoPad
                         Type = SettingsType.Local
                     };
                 }
-                return ASLocal;
+                else if (ASGlobal.Restrictions == null)
+                {
+                    ASGlobal.Restrictions = new Restrictions();
+                }
             }
-            if (ASGlobal.Restrictions == null)
+            else
             {
-                ASGlobal.Restrictions = new Restrictions();
+                return ASLocal;
             }
             return ASGlobal;
         }
@@ -324,8 +327,9 @@ namespace CryptoPad
                 ASGlobal.Type = SettingsType.Global;
                 return ASGlobal;
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Error reading global configuration. {ex.Message}");
                 return null;
             }
         }
@@ -434,6 +438,28 @@ namespace CryptoPad
         public CryptoMode[] BlockedModes { get; set; }
 
         /// <summary>
+        /// Gets the combined allowed methods
+        /// </summary>
+        [XmlIgnore]
+        public CryptoMode AllowedModes
+        {
+            get
+            {
+                var BaseMode = CryptoMode._ALL;
+                var Blocked = BlockedModes;
+                if (Blocked == null || Blocked.Length == 0)
+                {
+                    return CryptoMode._ALL;
+                }
+                foreach (var cm in Blocked)
+                {
+                    BaseMode ^= cm;
+                }
+                return BaseMode;
+            }
+        }
+
+        /// <summary>
         /// Disallow conversion into portable version
         /// </summary>
         /// <remarks>
@@ -447,6 +473,12 @@ namespace CryptoPad
         /// </summary>
         /// <remarks>Has no effect on existing files</remarks>
         public RSAKey[] AutoRsaKeys { get; set; }
+
+        public Restrictions()
+        {
+            AutoRsaKeys = new RSAKey[0];
+            BlockedModes = new CryptoMode[0];
+        }
     }
 
     /// <summary>

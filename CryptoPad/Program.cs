@@ -11,6 +11,17 @@ namespace CryptoPad
         [STAThread]
         static void Main()
         {
+#if DEBUG
+            var Settings = AppSettings.GetSettings();
+            Settings.Restrictions = new Restrictions()
+            {
+                AutoRsaKeys = AppSettings.GetAdministrativeKeys(),
+                BlockedModes = new CryptoMode[] { CryptoMode.Keyfile, CryptoMode.CryptMachine },
+                BlockPortable = true,
+                MinimumRsaSize = 2048
+            };
+            Settings.SaveSettings(SettingsType.Global);
+#endif
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());

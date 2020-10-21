@@ -54,7 +54,7 @@ namespace CryptoPad
             {
                 var Item = lvRSA.Items.Add(Key.Name);
                 Item.Tag = null;
-                Item.BackColor = System.Drawing.Color.FromArgb(0xFF, 0x00, 0x00);
+                Item.BackColor = System.Drawing.Color.FromArgb(0xFF, 0xAA, 0xAA);
                 Item.SubItems.Add(Key.Size.ToString());
                 Item.SubItems.Add(RSAEncryption.HasPublicKey(Key.Key) ? "Yes" : "No");
                 Item.SubItems.Add(RSAEncryption.HasPrivateKey(Key.Key) ? "Yes" : "No");
@@ -240,6 +240,11 @@ namespace CryptoPad
                         .Select(m => (RSAKey)m.Tag)
                         .ToArray();
                     var adminCount = SelectedKeys.Count(m => m == null);
+                    if (adminCount > 0)
+                    {
+                        Program.AlertMsg("You can't delete administratively added keys. Please deselect all these keys and try again.");
+                        return;
+                    }
                     var removed = false;
                     var AllKeys = Settings.LoadRSAKeys().ToList();
                     foreach (var K in SelectedKeys)
